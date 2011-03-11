@@ -1538,7 +1538,13 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
-
+	
+	/**
+         * should we use rotary or tab lockscreen?
+         * @hide
+         */
+	public static final String USE_ROTARY_LOCKSCREEN = "use_rotary_lockscreen";
+	
         /**
          * clock color values
          * @hide
