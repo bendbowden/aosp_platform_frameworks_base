@@ -1538,13 +1538,13 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
-	
+
 	/**
          * should we use rotary or tab lockscreen?
          * @hide
          */
 	public static final String USE_ROTARY_LOCKSCREEN = "use_rotary_lockscreen";
-	
+
         /**
          * clock color values
          * @hide
@@ -1583,6 +1583,37 @@ public final class Settings {
          * @hide
          */
         public static final String CENTER_BATTERY_PERCENT = "center_battery_percent";
+
+        /*
+         * whether to use custom haptic feedback for volume keys
+         * boolean (1 or 0).
+         * @hide
+         */
+        public static final String CUSTOM_HAPTIC_FEEDBACK_ENABLED = "custom_haptic_feedback_enabled";
+
+        /*
+         * haptic feedback vibration value
+         * @hide
+         */
+        public static final String HAPTIC_FEEDBACK_VIBRATION_VALUE = "haptic_feedback_vibration_value";
+
+        /*
+         * whether to launcher googlevoice app with voicemail shortcuts
+         * @hide
+         */
+        public static final String VM_USES_GOOGLEVOICE = "vm_uses_googlevoice";
+
+        /*
+         * whether to launch youmail app with voicemail shortcuts
+         * @hide
+         */
+        public static final String VM_USES_YOUMAIL = "vm_uses_youmail";
+
+        /*
+         * whether to launch verizon vvm app with voicemail shortcuts
+         * @hide
+         */
+        public static final String VM_USES_VERIZON = "vm_uses_verizon";
 
         /**
          * CDMA only settings
