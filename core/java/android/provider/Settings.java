@@ -27,6 +27,7 @@ import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -57,8 +58,14 @@ import java.util.Map;
  * The Settings provider contains global system-level device preferences.
  */
 public final class Settings {
+    /** Intent actions for Settings
+     * @hide
+     */
+    public static final String SETTINGS_CHANGED = "android.settings.SETTINGS_CHANGED_ACTION";
 
-    // Intent actions for Settings
+    public Settings() {
+        /* Empty for API conflicts */
+    }
 
     /**
      * Activity Action: Show system settings.
@@ -1614,6 +1621,22 @@ public final class Settings {
          * @hide
          */
         public static final String VM_USES_VERIZON = "vm_uses_verizon";
+
+        /**
+         * should we use galaxy s-style power widget?
+         * @hide
+         */
+        public static final String DISPLAY_GALAXY_S_WIDGET = "display_galaxy_s_widget";
+        /**
+         * widgets to display
+         * @hide
+         */
+        public static final String GALAXY_S_WIDGET_BUTTONS = "galaxy_s_widget_buttons";
+        /**
+         * widget color
+         * @hide
+         */
+        public static final String GALAXY_S_WIDGET_COLOR = "galaxy_s_widget_color";
 
         /**
          * CDMA only settings
@@ -3496,12 +3519,13 @@ public final class Settings {
 
         /**
          * Thread-safe method for enabling or disabling a single location provider.
-         * @param cr the content resolver to use
+         * @param cr the content resolver from the calling application
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
          */
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
+            Context context = cr.getContext();
             // to ensure thread safety, we write the provider name with a '+' or '-'
             // and let the SettingsProvider handle it rather than reading and modifying
             // the list of enabled providers.
@@ -3511,6 +3535,16 @@ public final class Settings {
                 provider = "-" + provider;
             }
             putString(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider);
+            try {
+                Intent i = new Intent();
+                i.setAction(Settings.SETTINGS_CHANGED);
+                i.putExtra("SETTING", "GPS");
+                i.putExtra("GPS_STATUS_CHANGE", enabled);
+                context.sendBroadcast(i);
+            } catch(Exception e) {
+                //This is ignored, as this try-catch is just incase this is called
+                //Before the system is read.
+            }
         }
     }
 
