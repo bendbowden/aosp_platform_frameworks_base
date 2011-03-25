@@ -1543,7 +1543,31 @@ public final class Settings {
          * should we use rotary or tab lockscreen?
          * @hide
          */
-	public static final String USE_ROTARY_LOCKSCREEN = "use_rotary_lockscreen";
+	public static final String LOCKSCREEN_STYLE_PREF = "lockscreen_style_pref";
+
+        /**
+         * Whether to use a custom tabs on both the slider and rotary style lockscreens
+         * @hide
+         */
+        public static final String LOCKSCREEN_CUSTOM_APP_TOGGLE = "lockscreen_custom_app_toggle";
+
+        /**
+         * App to launch with custom app toggle enabled
+         * @hide
+         */
+        public static final String LOCKSCREEN_CUSTOM_APP_ACTIVITY = "lockscreen_custom_app_activity";
+
+        /**
+         * When enabled, rotary lockscreen switches app starter and unlock, so you can drag down to unlock
+         * @hide
+         */
+        public static final String LOCKSCREEN_ROTARY_UNLOCK_DOWN = "lockscreen_rotary_unlock_down";
+
+        /**
+         * When enabled, directional hint arrows are supressed
+         * @hide
+         */
+        public static final String LOCKSCREEN_ROTARY_HIDE_ARROWS = "lockscreen_rotary_hide_arrows";
 
         /**
          * clock color values

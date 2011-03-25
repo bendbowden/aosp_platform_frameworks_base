@@ -63,7 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/carrier"
-        android:layout_marginTop="52dip"
+        android:layout_marginTop="42dip"
         android:layout_marginLeft="20dip"
         android:paddingBottom="8dip"
         >
@@ -144,13 +144,31 @@
         />
 
     <com.android.internal.widget.SlidingTab
+        android:id="@+id/tab_selector2"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="150dip"
+        />
+
+    <com.android.internal.widget.SlidingTab
         android:id="@+id/tab_selector"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="80dip"
+        android:layout_marginBottom="60dip"
         />
+    
+    <com.android.internal.widget.RotarySelector
+	android:id="@id/rotary_selector"
+        android:orientation="horizontal"
+	android:layout_width="fill_parent" 
+	android:layout_height="wrap_content" 
+	android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dip" 
+	/>
 
     <!-- emergency call button shown when sim is PUKd and tab_selector is
          hidden -->
@@ -175,7 +193,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dip"
+        android:layout_marginBottom="10dip"
         android:padding="10px"
         android:background="@color/transparent"
         android:visibility="gone"
@@ -187,7 +205,7 @@
         android:src="@drawable/ic_media_pause"
         android:layout_centerInParent="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dip"
+        android:layout_marginBottom="10dip"
         android:padding="10px"
         android:background="@color/transparent"
         android:visibility="gone"
@@ -198,7 +216,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_media_previous"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dip"
+        android:layout_marginBottom="10dip"
         android:padding="10px"
         android:layout_toLeftOf="@+id/musicControlPause"
         android:background="@color/transparent"
@@ -210,7 +228,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_media_next"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dip"
+        android:layout_marginBottom="10dip"
         android:padding="10px"
         android:layout_toRightOf="@+id/musicControlPause"
         android:background="@color/transparent"

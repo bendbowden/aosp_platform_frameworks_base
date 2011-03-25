@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2009 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.internal.widget;
 
@@ -38,10 +38,10 @@ import com.android.internal.R;
 
 
 /**
- * Custom view that presents up to two items that are selectable by rotating a semi-circle from
- * left to right, or right to left.  Used by incoming call screen, and the lock screen when no
- * security pattern is set.
- */
+* Custom view that presents up to two items that are selectable by rotating a semi-circle from
+* left to right, or right to left. Used by incoming call screen, and the lock screen when no
+* security pattern is set.
+*/
 public class RotarySelector extends View {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
@@ -62,25 +62,39 @@ public class RotarySelector extends View {
 
     private Bitmap mLeftHandleIcon;
     private Bitmap mRightHandleIcon;
+    private Bitmap mMidHandleIcon;
 
     private Bitmap mArrowShortLeftAndRight;
-    private Bitmap mArrowLongLeft;  // Long arrow starting on the left, pointing clockwise
-    private Bitmap mArrowLongRight;  // Long arrow starting on the right, pointing CCW
+    private Bitmap mArrowLongLeft; // Long arrow starting on the left, pointing clockwise
+    private Bitmap mArrowLongRight; // Long arrow starting on the right, pointing CCW
+    private Bitmap mArrowDown; // Down arrow for middle handle
 
     // positions of the left and right handle
     private int mLeftHandleX;
     private int mRightHandleX;
+    private int mMidHandleX;
 
     // current offset of rotary widget along the x axis
     private int mRotaryOffsetX = 0;
+    // current offset of rotary widget along the y axis - added to pull middle dimple down
+    private int mRotaryOffsetY = 0;
+    // saves the initial Y value on ACTION_DOWN
+    private int mEventStartY;
+    // controls display of custom app dimple
+    private boolean mCustomAppDimple=false;
+    // controls hiding of directional arrows
+    private boolean mHideArrows=false;
 
     // state of the animation used to bring the handle back to its start position when
     // the user lets go before triggering an action
     private boolean mAnimating = false;
+    private boolean mAnimatingUp = false;
     private long mAnimationStartTime;
     private long mAnimationDuration;
-    private int mAnimatingDeltaXStart;   // the animation will interpolate from this delta to zero
+    private int mAnimatingDeltaXStart; // the animation will interpolate from this delta to zero
     private int mAnimatingDeltaXEnd;
+    private int mAnimatingDeltaYStart;
+    private int mAnimatingDeltaYEnd;
 
     private DecelerateInterpolator mInterpolator;
 
@@ -91,43 +105,44 @@ public class RotarySelector extends View {
     final Matrix mArrowMatrix = new Matrix();
 
     /**
-     * If the user is currently dragging something.
-     */
+* If the user is currently dragging something.
+*/
     private int mGrabbedState = NOTHING_GRABBED;
     public static final int NOTHING_GRABBED = 0;
     public static final int LEFT_HANDLE_GRABBED = 1;
-    public static final int RIGHT_HANDLE_GRABBED = 2;
+    public static final int MID_HANDLE_GRABBED = 2;
+    public static final int RIGHT_HANDLE_GRABBED = 3;
 
     /**
-     * Whether the user has triggered something (e.g dragging the left handle all the way over to
-     * the right).
-     */
+* Whether the user has triggered something (e.g dragging the left handle all the way over to
+* the right).
+*/
     private boolean mTriggered = false;
 
     // Vibration (haptic feedback)
     private Vibrator mVibrator;
-    private static final long VIBRATE_SHORT = 20;  // msec
-    private static final long VIBRATE_LONG = 20;  // msec
+    private static final long VIBRATE_SHORT = 30; // msec
+    private static final long VIBRATE_LONG = 40; // msec
 
     /**
-     * The drawable for the arrows need to be scrunched this many dips towards the rotary bg below
-     * it.
-     */
+* The drawable for the arrows need to be scrunched this many dips towards the rotary bg below
+* it.
+*/
     private static final int ARROW_SCRUNCH_DIP = 6;
 
     /**
-     * How far inset the left and right circles should be
-     */
+* How far inset the left and right circles should be
+*/
     private static final int EDGE_PADDING_DIP = 9;
 
     /**
-     * How far from the edge of the screen the user must drag to trigger the event.
-     */
+* How far from the edge of the screen the user must drag to trigger the event.
+*/
     private static final int EDGE_TRIGGER_DIP = 100;
 
     /**
-     * Dimensions of arc in background drawable.
-     */
+* Dimensions of arc in background drawable.
+*/
     static final int OUTER_ROTARY_RADIUS_DIP = 390;
     static final int ROTARY_STROKE_WIDTH_DIP = 83;
     static final int SNAP_BACK_ANIMATION_DURATION_MILLIS = 300;
@@ -146,15 +161,15 @@ public class RotarySelector extends View {
     private int mMaximumVelocity;
 
     /**
-     * The number of dimples we are flinging when we do the "spin" animation.  Used to know when to
-     * wrap the icons back around so they "rotate back" onto the screen.
-     * @see #updateAnimation()
-     */
+* The number of dimples we are flinging when we do the "spin" animation. Used to know when to
+* wrap the icons back around so they "rotate back" onto the screen.
+* @see #updateAnimation()
+*/
     private int mDimplesOfFling = 0;
 
     /**
-     * Either {@link #HORIZONTAL} or {@link #VERTICAL}.
-     */
+* Either {@link #HORIZONTAL} or {@link #VERTICAL}.
+*/
     private int mOrientation;
 
 
@@ -163,8 +178,8 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Constructor used when this widget is created from a layout file.
-     */
+* Constructor used when this widget is created from a layout file.
+*/
     public RotarySelector(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -184,6 +199,7 @@ public class RotarySelector extends View {
 
         mArrowLongLeft = getBitmapFor(R.drawable.jog_dial_arrow_long_left_green);
         mArrowLongRight = getBitmapFor(R.drawable.jog_dial_arrow_long_right_red);
+        mArrowDown = getBitmapFor(R.drawable.jog_dial_arrow_short_down_green);
         mArrowShortLeftAndRight = getBitmapFor(R.drawable.jog_dial_arrow_short_left_and_right);
 
         mInterpolator = new DecelerateInterpolator(1f);
@@ -214,6 +230,7 @@ public class RotarySelector extends View {
         mLeftHandleX = edgePadding + mDimpleWidth / 2;
         final int length = isHoriz() ? w : h;
         mRightHandleX = length - edgePadding - mDimpleWidth / 2;
+        mMidHandleX = length / 2;
         mDimpleSpacing = (length / 2) - mLeftHandleX;
 
         // bg matrix only needs to be calculated once
@@ -234,13 +251,13 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Sets the left handle icon to a given resource.
-     *
-     * The resource should refer to a Drawable object, or use 0 to remove
-     * the icon.
-     *
-     * @param resId the resource ID.
-     */
+* Sets the left handle icon to a given resource.
+*
+* The resource should refer to a Drawable object, or use 0 to remove
+* the icon.
+*
+* @param resId the resource ID.
+*/
     public void setLeftHandleResource(int resId) {
         if (resId != 0) {
             mLeftHandleIcon = getBitmapFor(resId);
@@ -249,13 +266,13 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Sets the right handle icon to a given resource.
-     *
-     * The resource should refer to a Drawable object, or use 0 to remove
-     * the icon.
-     *
-     * @param resId the resource ID.
-     */
+* Sets the right handle icon to a given resource.
+*
+* The resource should refer to a Drawable object, or use 0 to remove
+* the icon.
+*
+* @param resId the resource ID.
+*/
     public void setRightHandleResource(int resId) {
         if (resId != 0) {
             mRightHandleIcon = getBitmapFor(resId);
@@ -263,6 +280,20 @@ public class RotarySelector extends View {
         invalidate();
     }
 
+    /**
+* Sets the middle handle icon to a given resource.
+*
+* The resource should refer to a Drawable object, or use 0 to remove
+* the icon.
+*
+* @param resId the resource ID.
+*/
+    public void setMidHandleResource(int resId) {
+        if (resId != 0) {
+            mMidHandleIcon = getBitmapFor(resId);
+        }
+        invalidate();
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -276,6 +307,7 @@ public class RotarySelector extends View {
         // overlaying somewhat (though on transparent portions of the drawable).
         // this works because the arrows are drawn from the top, and the rotary bg is drawn
         // from the bottom.
+
         final int height = mBackgroundHeight + arrowH - arrowScrunch;
 
         if (isHoriz()) {
@@ -290,6 +322,12 @@ public class RotarySelector extends View {
         super.onDraw(canvas);
 
         final int width = getWidth();
+        final int height = getHeight();
+        final int bgHeight = mBackgroundHeight;
+        final int bgTop = isHoriz() ?
+                height - bgHeight:
+                width - bgHeight;
+        final int halfdimple = mDimpleWidth / 2;
 
         if (VISUAL_DEBUG) {
             // draw bounding box around widget
@@ -298,47 +336,59 @@ public class RotarySelector extends View {
             canvas.drawRect(0, 0, width, getHeight(), mPaint);
         }
 
-        final int height = getHeight();
-
         // update animating state before we draw anything
-        if (mAnimating) {
+        if (mAnimating || mAnimatingUp) {
             updateAnimation();
         }
 
         // Background:
+        mBgMatrix.setTranslate(0, (float)(mRotaryOffsetY + bgTop));
         canvas.drawBitmap(mBackground, mBgMatrix, mPaint);
+        mBgMatrix.setTranslate(0, - (float)(mRotaryOffsetY + bgTop));
 
         // Draw the correct arrow(s) depending on the current state:
-        mArrowMatrix.reset();
-        switch (mGrabbedState) {
-            case NOTHING_GRABBED:
-                //mArrowShortLeftAndRight;
-                break;
-            case LEFT_HANDLE_GRABBED:
-                mArrowMatrix.setTranslate(0, 0);
-                if (!isHoriz()) {
-                    mArrowMatrix.preRotate(-90, 0, 0);
-                    mArrowMatrix.postTranslate(0, height);
-                }
-                //canvas.drawBitmap(mArrowLongLeft, mArrowMatrix, mPaint);
-                break;
-            case RIGHT_HANDLE_GRABBED:
-                mArrowMatrix.setTranslate(0, 0);
-                if (!isHoriz()) {
-                    mArrowMatrix.preRotate(-90, 0, 0);
-                    // since bg width is > height of screen in landscape mode...
-                    mArrowMatrix.postTranslate(0, height + (mBackgroundWidth - height));
-                }
-                //canvas.drawBitmap(mArrowLongRight, mArrowMatrix, mPaint);
-                break;
-            default:
-                throw new IllegalStateException("invalid mGrabbedState: " + mGrabbedState);
+        if (!mHideArrows) {
+            mArrowMatrix.reset();
+            switch (mGrabbedState) {
+                case NOTHING_GRABBED:
+                    //mArrowShortLeftAndRight;
+                    break;
+                case LEFT_HANDLE_GRABBED:
+                    mArrowMatrix.setTranslate(0, 0);
+                    if (!isHoriz()) {
+                        mArrowMatrix.preRotate(-90, 0, 0);
+                        mArrowMatrix.postTranslate(0, height);
+                    }
+                    canvas.drawBitmap(mArrowLongLeft, mArrowMatrix, mPaint);
+                    break;
+                case MID_HANDLE_GRABBED:
+                    mArrowMatrix.setTranslate(0, 0);
+                    if (!isHoriz()) {
+                        mArrowMatrix.preRotate(-90, 0, 0);
+                    }
+                    // draw left down arrow
+                    mArrowMatrix.postTranslate(halfdimple, 0);
+                    canvas.drawBitmap(mArrowDown, mArrowMatrix, mPaint);
+                    // draw right down arrow
+                    mArrowMatrix.postTranslate(mRightHandleX-mLeftHandleX, 0);
+                    canvas.drawBitmap(mArrowDown, mArrowMatrix, mPaint);
+                    // draw mid down arrow
+                    mArrowMatrix.postTranslate(mMidHandleX-mRightHandleX, -(mDimpleWidth/4));
+                    canvas.drawBitmap(mArrowDown, mArrowMatrix, mPaint);
+                    break;
+                case RIGHT_HANDLE_GRABBED:
+                    mArrowMatrix.setTranslate(0, 0);
+                    if (!isHoriz()) {
+                        mArrowMatrix.preRotate(-90, 0, 0);
+                        // since bg width is > height of screen in landscape mode...
+                        mArrowMatrix.postTranslate(0, height + (mBackgroundWidth - height));
+                    }
+                    canvas.drawBitmap(mArrowLongRight, mArrowMatrix, mPaint);
+                    break;
+                default:
+                    throw new IllegalStateException("invalid mGrabbedState: " + mGrabbedState);
+            }
         }
-
-        final int bgHeight = mBackgroundHeight;
-        final int bgTop = isHoriz() ?
-                height - bgHeight:
-                width - bgHeight;
 
         if (VISUAL_DEBUG) {
             // draw circle bounding arc drawable: good sanity check we're doing the math correctly
@@ -370,22 +420,21 @@ public class RotarySelector extends View {
             }
         }
 
-        // center dimple
+        // center dimple / icon
         {
-            final int xOffset = isHoriz() ?
-                    width / 2 + mRotaryOffsetX:
-                    height / 2 + mRotaryOffsetX;
+            final int xOffset = mMidHandleX + mRotaryOffsetX;
             final int drawableY = getYOnArc(
                     mBackgroundWidth,
                     mInnerRadius,
                     mOuterRadius,
                     xOffset);
-
-            if (isHoriz()) {
-                drawCentered(mDimpleDim, canvas, xOffset, drawableY + bgTop);
+            final int x = isHoriz() ? xOffset : drawableY + bgTop;
+            final int y = isHoriz() ? drawableY + bgTop : height - xOffset;
+            if (mGrabbedState != LEFT_HANDLE_GRABBED && mGrabbedState != RIGHT_HANDLE_GRABBED && mCustomAppDimple) {
+                drawCentered(mDimple, canvas, x, y);
+                drawCentered(mMidHandleIcon, canvas, x, y);
             } else {
-                // vertical
-                drawCentered(mDimpleDim, canvas, drawableY + bgTop, height - xOffset);
+                drawCentered(mDimpleDim, canvas, x, y);
             }
         }
 
@@ -410,7 +459,6 @@ public class RotarySelector extends View {
 
         // draw extra left hand dimples
         int dimpleLeft = mRotaryOffsetX + mLeftHandleX - mDimpleSpacing;
-        final int halfdimple = mDimpleWidth / 2;
         while (dimpleLeft > -halfdimple) {
             final int drawableY = getYOnArc(
                     mBackgroundWidth,
@@ -424,6 +472,24 @@ public class RotarySelector extends View {
                 drawCentered(mDimpleDim, canvas, drawableY + bgTop, height - dimpleLeft);
             }
             dimpleLeft -= mDimpleSpacing;
+        }
+
+        // draw extra middle dimples
+        int dimpleMid = mRotaryOffsetX + mMidHandleX + mDimpleSpacing;
+        final int midThresh = mMidHandleX + halfdimple;
+        while (dimpleMid < midThresh) {
+            final int drawableY = getYOnArc(
+                    mBackgroundWidth,
+                    mInnerRadius,
+                    mOuterRadius,
+                    dimpleMid);
+
+            if (isHoriz()) {
+                drawCentered(mDimpleDim, canvas, dimpleLeft, drawableY + bgTop);
+            } else {
+                drawCentered(mDimpleDim, canvas, drawableY + bgTop, height - dimpleMid);
+            }
+            dimpleMid += mDimpleSpacing;
         }
 
         // draw extra right hand dimples
@@ -446,20 +512,20 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Assuming bitmap is a bounding box around a piece of an arc drawn by two concentric circles
-     * (as the background drawable for the rotary widget is), and given an x coordinate along the
-     * drawable, return the y coordinate of a point on the arc that is between the two concentric
-     * circles.  The resulting y combined with the incoming x is a point along the circle in
-     * between the two concentric circles.
-     *
-     * @param backgroundWidth The width of the asset (the bottom of the box surrounding the arc).
-     * @param innerRadius The radius of the circle that intersects the drawable at the bottom two
-     *        corders of the drawable (top two corners in terms of drawing coordinates).
-     * @param outerRadius The radius of the circle who's top most point is the top center of the
-     *        drawable (bottom center in terms of drawing coordinates).
-     * @param x The distance along the x axis of the desired point.    @return The y coordinate, in drawing coordinates, that will place (x, y) along the circle
-     *        in between the two concentric circles.
-     */
+* Assuming bitmap is a bounding box around a piece of an arc drawn by two concentric circles
+* (as the background drawable for the rotary widget is), and given an x coordinate along the
+* drawable, return the y coordinate of a point on the arc that is between the two concentric
+* circles. The resulting y combined with the incoming x is a point along the circle in
+* between the two concentric circles.
+*
+* @param backgroundWidth The width of the asset (the bottom of the box surrounding the arc).
+* @param innerRadius The radius of the circle that intersects the drawable at the bottom two
+* corders of the drawable (top two corners in terms of drawing coordinates).
+* @param outerRadius The radius of the circle who's top most point is the top center of the
+* drawable (bottom center in terms of drawing coordinates).
+* @param x The distance along the x axis of the desired point. @return The y coordinate, in drawing coordinates, that will place (x, y) along the circle
+* in between the two concentric circles.
+*/
     private int getYOnArc(int backgroundWidth, int innerRadius, int outerRadius, int x) {
 
         // the hypotenuse
@@ -475,17 +541,17 @@ public class RotarySelector extends View {
 
         // convert to drawing coordinates:
         // middleRadius - triangleY =
-        //   the vertical distance from the outer edge of the circle to the desired point
+        // the vertical distance from the outer edge of the circle to the desired point
         // from there we add the distance from the top of the drawable to the middle circle
-        return middleRadius - triangleY + halfWidth;
+        return middleRadius - triangleY + halfWidth + mRotaryOffsetY;
     }
 
     /**
-     * Handle touch screen events.
-     *
-     * @param event The motion event.
-     * @return True if the event was handled, false otherwise.
-     */
+* Handle touch screen events.
+*
+* @param event The motion event.
+* @return True if the event was handled, false otherwise.
+*/
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mAnimating) {
@@ -497,17 +563,23 @@ public class RotarySelector extends View {
         mVelocityTracker.addMovement(event);
 
         final int height = getHeight();
+        final int width = getWidth();
 
         final int eventX = isHoriz() ?
                 (int) event.getX():
                 height - ((int) event.getY());
+        final int eventY = isHoriz() ?
+                (int) event.getY():
+                width - ((int) event.getY());
         final int hitWindow = mDimpleWidth;
+        final int downThresh = (isHoriz() ? width : height) - mDimpleWidth;
 
         final int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (DBG) log("touch-down");
                 mTriggered = false;
+                mEventStartY = eventY;
                 if (mGrabbedState != NOTHING_GRABBED) {
                     reset();
                     invalidate();
@@ -517,12 +589,17 @@ public class RotarySelector extends View {
                     setGrabbedState(LEFT_HANDLE_GRABBED);
                     invalidate();
                     vibrate(VIBRATE_SHORT);
+                } else if (eventX > mMidHandleX - hitWindow && eventX <= mRightHandleX - hitWindow && mCustomAppDimple) {
+                    setGrabbedState(MID_HANDLE_GRABBED);
+                    invalidate();
+                    vibrate(VIBRATE_SHORT);
                 } else if (eventX > mRightHandleX - hitWindow) {
                     mRotaryOffsetX = eventX - mRightHandleX;
                     setGrabbedState(RIGHT_HANDLE_GRABBED);
                     invalidate();
                     vibrate(VIBRATE_SHORT);
                 }
+
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -547,6 +624,17 @@ public class RotarySelector extends View {
                                 eventX - mLeftHandleX,
                                 mDimplesOfFling * mDimpleSpacing,
                                 velocity);
+                    }
+                } else if (mGrabbedState == MID_HANDLE_GRABBED && mCustomAppDimple) {
+                    mRotaryOffsetY = eventY - mEventStartY;
+                    if (mRotaryOffsetY < 0) mRotaryOffsetY=0;
+                    invalidate();
+
+                    if (mRotaryOffsetY >= mDimpleWidth * 2 && !mTriggered) {
+                        mTriggered = true;
+                        dispatchTriggerEvent(OnDialTriggerListener.MID_HANDLE);
+                        // set up "flow up" animation
+                        startAnimationUp(eventY - mEventStartY, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
                     }
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED) {
                     mRotaryOffsetX = eventX - mRightHandleX;
@@ -577,12 +665,17 @@ public class RotarySelector extends View {
                         && Math.abs(eventX - mLeftHandleX) > 5) {
                     // set up "snap back" animation
                     startAnimation(eventX - mLeftHandleX, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
+                } else if (mGrabbedState == MID_HANDLE_GRABBED && mCustomAppDimple
+                        && eventY - mEventStartY > 5) {
+                    // set up "flow up" animation
+                    startAnimationUp(eventY - mEventStartY, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED
                         && Math.abs(eventX - mRightHandleX) > 5) {
                     // set up "snap back" animation
                     startAnimation(eventX - mRightHandleX, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
                 }
                 mRotaryOffsetX = 0;
+                mRotaryOffsetY = 0;
                 setGrabbedState(NOTHING_GRABBED);
                 invalidate();
                 if (mVelocityTracker != null) {
@@ -624,26 +717,46 @@ public class RotarySelector extends View {
         invalidate();
     }
 
+    private void startAnimationUp(int startY, int endY, int duration) {
+        mAnimatingUp = true;
+        mAnimationStartTime = currentAnimationTimeMillis();
+        mAnimationDuration = duration;
+        mAnimatingDeltaYStart = startY;
+        mAnimatingDeltaYEnd = endY;
+        setGrabbedState(NOTHING_GRABBED);
+        invalidate();
+    }
+
     private void updateAnimation() {
         final long millisSoFar = currentAnimationTimeMillis() - mAnimationStartTime;
         final long millisLeft = mAnimationDuration - millisSoFar;
         final int totalDeltaX = mAnimatingDeltaXStart - mAnimatingDeltaXEnd;
+        final int totalDeltaY = mAnimatingDeltaYStart - mAnimatingDeltaYEnd;
+        int delta;
         final boolean goingRight = totalDeltaX < 0;
         if (DBG) log("millisleft for animating: " + millisLeft);
         if (millisLeft <= 0) {
+            mAnimating=false;
+            mAnimatingUp=false;
             reset();
             return;
         }
         // from 0 to 1 as animation progresses
         float interpolation =
                 mInterpolator.getInterpolation((float) millisSoFar / mAnimationDuration);
-        final int dx = (int) (totalDeltaX * (1 - interpolation));
-        mRotaryOffsetX = mAnimatingDeltaXEnd + dx;
+        if (mAnimating){
+            delta = (int) (totalDeltaX * (1 - interpolation));
+            mRotaryOffsetX = mAnimatingDeltaXEnd + delta;
+        }
+        if (mAnimatingUp){
+            delta = (int) (totalDeltaY * (1 - interpolation));
+            mRotaryOffsetY = mAnimatingDeltaYEnd + delta;
+        }
 
         // once we have gone far enough to animate the current buttons off screen, we start
         // wrapping the offset back to the other side so that when the animation is finished,
         // the buttons will come back into their original places.
-        if (mDimplesOfFling > 0) {
+        if (mDimplesOfFling > 0 && mAnimatingUp == false) {
             if (!goingRight && mRotaryOffsetX < -3 * mDimpleSpacing) {
                 // wrap around on fling left
                 mRotaryOffsetX += mDimplesOfFling * mDimpleSpacing;
@@ -664,8 +777,8 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Triggers haptic feedback.
-     */
+* Triggers haptic feedback.
+*/
     private synchronized void vibrate(long duration) {
         if (mVibrator == null) {
             mVibrator = (android.os.Vibrator)
@@ -675,10 +788,10 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Draw the bitmap so that it's centered
-     * on the point (x,y), then draws it using specified canvas.
-     * TODO: is there already a utility method somewhere for this?
-     */
+* Draw the bitmap so that it's centered
+* on the point (x,y), then draws it using specified canvas.
+* TODO: is there already a utility method somewhere for this?
+*/
     private void drawCentered(Bitmap d, Canvas c, int x, int y) {
         int w = d.getWidth();
         int h = d.getHeight();
@@ -688,18 +801,18 @@ public class RotarySelector extends View {
 
 
     /**
-     * Registers a callback to be invoked when the dial
-     * is "triggered" by rotating it one way or the other.
-     *
-     * @param l the OnDialTriggerListener to attach to this view
-     */
+* Registers a callback to be invoked when the dial
+* is "triggered" by rotating it one way or the other.
+*
+* @param l the OnDialTriggerListener to attach to this view
+*/
     public void setOnDialTriggerListener(OnDialTriggerListener l) {
         mOnDialTriggerListener = l;
     }
 
     /**
-     * Dispatches a trigger event to our listener.
-     */
+* Dispatches a trigger event to our listener.
+*/
     private void dispatchTriggerEvent(int whichHandle) {
         vibrate(VIBRATE_LONG);
         if (mOnDialTriggerListener != null) {
@@ -708,9 +821,9 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Sets the current grabbed state, and dispatches a grabbed state change
-     * event to our listener.
-     */
+* Sets the current grabbed state, and dispatches a grabbed state change
+* event to our listener.
+*/
     private void setGrabbedState(int newState) {
         if (newState != mGrabbedState) {
             mGrabbedState = newState;
@@ -721,40 +834,60 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Interface definition for a callback to be invoked when the dial
-     * is "triggered" by rotating it one way or the other.
-     */
+* Interface definition for a callback to be invoked when the dial
+* is "triggered" by rotating it one way or the other.
+*/
     public interface OnDialTriggerListener {
         /**
-         * The dial was triggered because the user grabbed the left handle,
-         * and rotated the dial clockwise.
-         */
+* The dial was triggered because the user grabbed the left handle,
+* and rotated the dial clockwise.
+*/
         public static final int LEFT_HANDLE = 1;
 
         /**
-         * The dial was triggered because the user grabbed the right handle,
-         * and rotated the dial counterclockwise.
-         */
-        public static final int RIGHT_HANDLE = 2;
+* The dial was triggered because the user grabbed the middle handle,
+* and moved the dial down.
+*/
+        public static final int MID_HANDLE = 2;
 
         /**
-         * Called when the dial is triggered.
-         *
-         * @param v The view that was triggered
-         * @param whichHandle  Which "dial handle" the user grabbed,
-         *        either {@link #LEFT_HANDLE}, {@link #RIGHT_HANDLE}.
-         */
+* The dial was triggered because the user grabbed the right handle,
+* and rotated the dial counterclockwise.
+*/
+        public static final int RIGHT_HANDLE = 3;
+
+        /**
+* Called when the dial is triggered.
+*
+* @param v The view that was triggered
+* @param whichHandle Which "dial handle" the user grabbed,
+* either {@link #LEFT_HANDLE}, {@link #RIGHT_HANDLE}.
+*/
         void onDialTrigger(View v, int whichHandle);
 
         /**
-         * Called when the "grabbed state" changes (i.e. when
-         * the user either grabs or releases one of the handles.)
-         *
-         * @param v the view that was triggered
-         * @param grabbedState the new state: either {@link #NOTHING_GRABBED},
-         * {@link #LEFT_HANDLE_GRABBED}, or {@link #RIGHT_HANDLE_GRABBED}.
-         */
+* Called when the "grabbed state" changes (i.e. when
+* the user either grabs or releases one of the handles.)
+*
+* @param v the view that was triggered
+* @param grabbedState the new state: either {@link #NOTHING_GRABBED},
+* {@link #LEFT_HANDLE_GRABBED}, or {@link #RIGHT_HANDLE_GRABBED}.
+*/
         void onGrabbedStateChange(View v, int grabbedState);
+    }
+
+    /**
+* Sets weather or not to display the custom app dimple
+*/
+    public void enableCustomAppDimple(boolean newState){
+        mCustomAppDimple=newState;
+    }
+
+    /**
+* Sets weather or not to display the directional arrows
+*/
+    public void hideArrows(boolean newState){
+        mHideArrows=newState;
     }
 
 
