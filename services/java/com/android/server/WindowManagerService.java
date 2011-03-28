@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,6 +87,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -317,7 +318,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Z-ordered (bottom-most first) list of all application tokens, for
-     * controlling the ordering of windows in different applications.  This
+     * controlling the ordering of windows in different applications. This
      * contains WindowToken objects.
      */
     final ArrayList<AppWindowToken> mAppTokens = new ArrayList<AppWindowToken>();
@@ -336,7 +337,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * This was the app token that was used to retrieve the last enter
-     * animation.  It will be used for the next exit animation.
+     * animation. It will be used for the next exit animation.
      */
     AppWindowToken mLastEnterAnimToken;
 
@@ -352,7 +353,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList mWindows = new ArrayList();
 
     /**
-     * Windows that are being resized.  Used so we can tell the client about
+     * Windows that are being resized. Used so we can tell the client about
      * the resize after closing the transaction in which we resized the
      * underlying surface.
      */
@@ -423,9 +424,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     PowerManager.WakeLock mScreenFrozenLock;
 
-    // State management of app transitions.  When we are preparing for a
+    // State management of app transitions. When we are preparing for a
     // transition, mNextAppTransition will be the kind of transition to
-    // perform or TRANSIT_NONE if we are not waiting.  If we are waiting,
+    // perform or TRANSIT_NONE if we are not waiting. If we are waiting,
     // mOpeningApps and mClosingApps are the lists of tokens that will be
     // made visible or hidden at the next transition.
     int mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
@@ -593,7 +594,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowManagerPolicyThread.set(this, Looper.myLooper());
             
             //Looper.myLooper().setMessageLogging(new LogPrinter(
-            //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
+            // Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_FOREGROUND);
             mPolicy.init(mContext, mService, mPM);
@@ -748,7 +749,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             placeWindowBefore(token.windows.get(index), win);
                             tokenWindowsPos--;
                         } else {
-                            int newIdx =  findIdxBasedOnAppTokens(win);
+                            int newIdx = findIdxBasedOnAppTokens(win);
                             if(newIdx != -1) {
                                 //there is a window above this one associated with the same
                                 //apptoken note that the window could be a floating window
@@ -783,7 +784,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             pos = t.windows.get(0);
                         }
                     }
-                    // We now know the index into the apps.  If we found
+                    // We now know the index into the apps. If we found
                     // an app window above, that gives us the position; else
                     // we need to look some more.
                     if (pos != null) {
@@ -938,13 +939,13 @@ public class WindowManagerService extends IWindowManager.Stub
             w = (WindowState)localmWindows.get(i);
 
             //Slog.i(TAG, "Checking window @" + i + " " + w + " fl=0x"
-            //        + Integer.toHexString(w.mAttrs.flags));
+            // + Integer.toHexString(w.mAttrs.flags));
             if (canBeImeTarget(w)) {
                 //Slog.i(TAG, "Putting input method here!");
 
-                // Yet more tricksyness!  If this window is a "starting"
+                // Yet more tricksyness! If this window is a "starting"
                 // window, we do actually want to be on top of it, but
-                // it is not -really- where input will go.  So if the caller
+                // it is not -really- where input will go. So if the caller
                 // is not actually looking to move the IME, look down below
                 // for a real window to target...
                 if (!willMove
@@ -970,7 +971,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (curTarget != null && curTarget.mAppToken != null) {
 
                 // Now some fun for dealing with window animations that
-                // modify the Z order.  We need to look at all windows below
+                // modify the Z order. We need to look at all windows below
                 // the current target that are in this app, finding the highest
                 // visible one in layering.
                 AppWindowToken token = curTarget.mAppToken;
@@ -1125,7 +1126,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void reAddWindowToListInOrderLocked(WindowState win) {
         addWindowToListInOrderLocked(win, false);
         // This is a hack to get all of the child windows added as well
-        // at the right position.  Child windows should be rare and
+        // at the right position. Child windows should be rare and
         // this case should be rare, so it shouldn't be that big a deal.
         int wpos = mWindows.indexOf(win);
         if (wpos >= 0) {
@@ -1154,7 +1155,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (DEBUG_INPUT_METHOD) {
             Slog.v(TAG, "Window list w/pos=" + pos);
-            logWindowList("  ");
+            logWindowList(" ");
         }
 
         if (pos >= 0) {
@@ -1173,7 +1174,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (DEBUG_INPUT_METHOD) {
                 Slog.v(TAG, "Final window list:");
-                logWindowList("  ");
+                logWindowList(" ");
             }
             return;
         }
@@ -1183,7 +1184,7 @@ public class WindowManagerService extends IWindowManager.Stub
             reAddWindowToListInOrderLocked(win);
             if (DEBUG_INPUT_METHOD) {
                 Slog.v(TAG, "No IM target, final list:");
-                logWindowList("  ");
+                logWindowList(" ");
             }
         }
     }
@@ -1216,7 +1217,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (firstImWin == baseImWin) {
-                // The windows haven't moved...  but are they still contiguous?
+                // The windows haven't moved... but are they still contiguous?
                 // First find the top IM window.
                 int pos = imPos+1;
                 while (pos < N) {
@@ -1242,18 +1243,18 @@ public class WindowManagerService extends IWindowManager.Stub
             if (imWin != null) {
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG, "Moving IM from " + imPos);
-                    logWindowList("  ");
+                    logWindowList(" ");
                 }
                 imPos = tmpRemoveWindowLocked(imPos, imWin);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG, "List after moving with new pos " + imPos + ":");
-                    logWindowList("  ");
+                    logWindowList(" ");
                 }
                 imWin.mTargetAppToken = mInputMethodTarget.mAppToken;
                 reAddWindowLocked(imPos, imWin);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG, "List after moving IM to " + imPos + ":");
-                    logWindowList("  ");
+                    logWindowList(" ");
                 }
                 if (DN > 0) moveInputMethodDialogsLocked(imPos+1);
             } else {
@@ -1271,7 +1272,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 reAddWindowToListInOrderLocked(imWin);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG, "List with no IM target:");
-                    logWindowList("  ");
+                    logWindowList(" ");
                 }
                 if (DN > 0) moveInputMethodDialogsLocked(-1);;
             } else {
@@ -1374,7 +1375,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // the current target or the next target are involved with it,
             // then hold off on doing anything with the wallpaper.
             // Note that we are checking here for just whether the target
-            // is part of an app token...  which is potentially overly aggressive
+            // is part of an app token... which is potentially overly aggressive
             // (the app token may not be involved in the transition), but good
             // enough (we'll just wait until whatever transition is pending
             // executes).
@@ -1402,7 +1403,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState oldW = mWallpaperTarget;
             mWallpaperTarget = foundW;
 
-            // Now what is happening...  if the current and new targets are
+            // Now what is happening... if the current and new targets are
             // animating, then we are in our super special mode!
             if (foundW != null && oldW != null) {
                 boolean oldAnim = oldW.mAnimation != null
@@ -1476,13 +1477,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean visible = foundW != null;
         if (visible) {
-            // The window is visible to the compositor...  but is it visible
-            // to the user?  That is what the wallpaper cares about.
+            // The window is visible to the compositor... but is it visible
+            // to the user? That is what the wallpaper cares about.
             visible = isWallpaperVisible(foundW);
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper visibility: " + visible);
 
             // If the wallpaper target is animating, we may need to copy
-            // its layer adjustment.  Only do this if we are not transfering
+            // its layer adjustment. Only do this if we are not transfering
             // between two wallpaper targets.
             mWallpaperAnimLayerAdjustment =
                     (mLowerWallpaperTarget == null && foundW.mAppToken != null)
@@ -1492,7 +1493,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     * TYPE_LAYER_MULTIPLIER
                     + TYPE_LAYER_OFFSET;
 
-            // Now w is the window we are supposed to be behind...  but we
+            // Now w is the window we are supposed to be behind... but we
             // need to be sure to also be behind any of its attached windows,
             // AND any starting window associated with it, AND below the
             // maximum layer the policy allows for wallpapers.
@@ -1520,7 +1521,7 @@ public class WindowManagerService extends IWindowManager.Stub
             foundW = topCurW;
             foundI = topCurI+1;
         } else {
-            // Okay i is the position immediately above the wallpaper.  Look at
+            // Okay i is the position immediately above the wallpaper. Look at
             // what is below it for later.
             foundW = foundI > 0 ? (WindowState)localmWindows.get(foundI-1) : null;
         }
@@ -1585,7 +1586,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
 
-                // The window didn't match...  the current wallpaper window,
+                // The window didn't match... the current wallpaper window,
                 // wherever it is, is in the wrong place, so make sure it is
                 // not in the list.
                 int oldIndex = localmWindows.indexOf(wallpaper);
@@ -1892,13 +1893,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 attachedWindow = windowForClientLocked(null, attrs.token, false);
                 if (attachedWindow == null) {
                     Slog.w(TAG, "Attempted to add window with token that is not a window: "
-                          + attrs.token + ".  Aborting.");
+                          + attrs.token + ". Aborting.");
                     return WindowManagerImpl.ADD_BAD_SUBWINDOW_TOKEN;
                 }
                 if (attachedWindow.mAttrs.type >= FIRST_SUB_WINDOW
                         && attachedWindow.mAttrs.type <= LAST_SUB_WINDOW) {
                     Slog.w(TAG, "Attempted to add window with token that is a sub-window: "
-                            + attrs.token + ".  Aborting.");
+                            + attrs.token + ". Aborting.");
                     return WindowManagerImpl.ADD_BAD_SUBWINDOW_TOKEN;
                 }
             }
@@ -1909,17 +1910,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (attrs.type >= FIRST_APPLICATION_WINDOW
                         && attrs.type <= LAST_APPLICATION_WINDOW) {
                     Slog.w(TAG, "Attempted to add application window with unknown token "
-                          + attrs.token + ".  Aborting.");
+                          + attrs.token + ". Aborting.");
                     return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
                 if (attrs.type == TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with unknown token "
-                          + attrs.token + ".  Aborting.");
+                          + attrs.token + ". Aborting.");
                     return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
                 if (attrs.type == TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with unknown token "
-                          + attrs.token + ".  Aborting.");
+                          + attrs.token + ". Aborting.");
                     return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
                 token = new WindowToken(attrs.token, -1, false);
@@ -1929,11 +1930,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken atoken = token.appWindowToken;
                 if (atoken == null) {
                     Slog.w(TAG, "Attempted to add window with non-application token "
-                          + token + ".  Aborting.");
+                          + token + ". Aborting.");
                     return WindowManagerImpl.ADD_NOT_APP_TOKEN;
                 } else if (atoken.removed) {
                     Slog.w(TAG, "Attempted to add window with exiting application token "
-                          + token + ".  Aborting.");
+                          + token + ". Aborting.");
                     return WindowManagerImpl.ADD_APP_EXITING;
                 }
                 if (attrs.type == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
@@ -1945,13 +1946,13 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (attrs.type == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with bad token "
-                            + attrs.token + ".  Aborting.");
+                            + attrs.token + ". Aborting.");
                       return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
             } else if (attrs.type == TYPE_WALLPAPER) {
                 if (token.windowType != TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with bad token "
-                            + attrs.token + ".  Aborting.");
+                            + attrs.token + ". Aborting.");
                       return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
             }
@@ -2056,7 +2057,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // sendNewConfiguration() checks caller permissions so we must call it with
-        // privilege.  updateOrientationFromAppTokens() clears and resets the caller
+        // privilege. updateOrientationFromAppTokens() clears and resets the caller
         // identity anyway, so it's safe to just clear & restore around this whole
         // block.
         final long origId = Binder.clearCallingIdentity();
@@ -2099,7 +2100,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " mDisplayFrozen=" + mDisplayFrozen);
         // Visibility of the removed window. Will be used later to update orientation later on.
         boolean wasVisible = false;
-        // First, see if we need to run an animation.  If we do, we have
+        // First, see if we need to run an animation. If we do, we have
         // to hold off on removing the window until the animation is done.
         // If the display is frozen, just remove immediately, since the
         // animation wouldn't be seen.
@@ -2232,7 +2233,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private static void logSurface(WindowState w, String msg, RuntimeException where) {
-        String str = "  SURFACE " + Integer.toHexString(w.hashCode())
+        String str = " SURFACE " + Integer.toHexString(w.hashCode())
                 + ": " + msg + " / " + w.mAttrs.getTitle();
         if (where != null) {
             Slog.i(TAG, str, where);
@@ -2299,7 +2300,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setWindowWallpaperPositionLocked(WindowState window, float x, float y,
             float xStep, float yStep) {
-        if (window.mWallpaperX != x || window.mWallpaperY != y)  {
+        if (window.mWallpaperX != x || window.mWallpaperY != y) {
             window.mWallpaperX = x;
             window.mWallpaperY = y;
             window.mWallpaperXStep = xStep;
@@ -2392,8 +2393,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (scaledWindow) {
                 // requested{Width|Height} Surface's physical size
                 // attrs.{width|height} Size on screen
-                win.mHScale = (attrs.width  != requestedWidth)  ?
-                        (attrs.width  / (float)requestedWidth) : 1.0f;
+                win.mHScale = (attrs.width != requestedWidth) ?
+                        (attrs.width / (float)requestedWidth) : 1.0f;
                 win.mVScale = (attrs.height != requestedHeight) ?
                         (attrs.height / (float)requestedHeight) : 1.0f;
             } else {
@@ -2465,9 +2466,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.mReportDestroySurface = false;
                         win.mSurfacePendingDestroy = false;
                         if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                                "  OUT SURFACE " + outSurface + ": copied");
+                                " OUT SURFACE " + outSurface + ": copied");
                     } else {
-                        // For some reason there isn't a surface.  Clear the
+                        // For some reason there isn't a surface. Clear the
                         // caller's object so they see the same state.
                         outSurface.release();
                     }
@@ -2543,7 +2544,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         & WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING) == 0
                         || win.mSurfacePendingDestroy) {
                     // We are being called from a local process, which
-                    // means outSurface holds its current surface.  Ensure the
+                    // means outSurface holds its current surface. Ensure the
                     // surface object is cleared, but we don't want it actually
                     // destroyed at this point.
                     win.mSurfacePendingDestroy = false;
@@ -2573,7 +2574,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (moveInputMethodWindowsIfNeededLocked(false) || displayed) {
                     // Little hack here -- we -should- be able to rely on the
                     // function to return true if the IME has moved and needs
-                    // its layer recomputed.  However, if the IME was hidden
+                    // its layer recomputed. However, if the IME was hidden
                     // and isn't actually moved in the list, its layer may be
                     // out of data so we make sure to recompute it.
                     assignLayers = true;
@@ -2647,7 +2648,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
         if (lp != null && lp.windowAnimations != 0) {
             // If this is a system resource, don't try to load it from the
-            // application resources.  It is nice to avoid loading application
+            // application resources. It is nice to avoid loading application
             // resources if we can.
             String packageName = lp.packageName != null ? lp.packageName : "android";
             int resId = lp.windowAnimations;
@@ -2695,7 +2696,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return true;
         }
 
-        // Only apply an animation if the display isn't frozen.  If it is
+        // Only apply an animation if the display isn't frozen. If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
@@ -2781,7 +2782,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private boolean applyAnimationLocked(AppWindowToken wtoken,
             WindowManager.LayoutParams lp, int transit, boolean enter) {
-        // Only apply an animation if the display isn't frozen.  If it is
+        // Only apply an animation if the display isn't frozen. If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
@@ -3179,11 +3180,11 @@ public class WindowManagerService extends IWindowManager.Stub
     /*
      * Determine the new desired orientation of the display, returning
      * a non-null new Configuration if it has changed from the current
-     * orientation.  IF TRUE IS RETURNED SOMEONE MUST CALL
+     * orientation. IF TRUE IS RETURNED SOMEONE MUST CALL
      * setNewConfiguration() TO TELL THE WINDOW MANAGER IT CAN UNFREEZE THE
-     * SCREEN.  This will typically be done for you if you call
+     * SCREEN. This will typically be done for you if you call
      * sendNewConfiguration().
-     * 
+     *
      * The orientation is computed from non-application windows first. If none of
      * the non-application windows specify orientation, the orientation is computed from
      * application tokens.
@@ -3193,9 +3194,9 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean updateOrientationFromAppTokensLocked() {
         if (mDisplayFrozen) {
             // If the display is frozen, some activities may be in the middle
-            // of restarting, and thus have removed their old window.  If the
+            // of restarting, and thus have removed their old window. If the
             // window has the flag to hide the lock screen, then the lock screen
-            // can re-appear and inflict its own orientation on us.  Keep the
+            // can re-appear and inflict its own orientation on us. Keep the
             // orientation stable until this all settles down.
             return false;
         }
@@ -3439,8 +3440,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         addWindowToListInOrderLocked(startingWindow, true);
 
                         // Propagate other interesting state between the
-                        // tokens.  If the old token is displayed, we should
-                        // immediately force the new one to be displayed.  If
+                        // tokens. If the old token is displayed, we should
+                        // immediately force the new one to be displayed. If
                         // it is animating, we need to move that animation to
                         // the new one.
                         if (ttoken.allDrawn) {
@@ -3475,7 +3476,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         return;
                     } else if (ttoken.startingData != null) {
                         // The previous app was getting ready to show a
-                        // starting window, but hasn't yet done so.  Steal it!
+                        // starting window, but hasn't yet done so. Steal it!
                         if (DEBUG_STARTING_WINDOW) Slog.v(TAG,
                                 "Moving pending starting from " + ttoken
                                 + " to " + wtoken);
@@ -3590,7 +3591,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 //Slog.i(TAG, "Window " + win + ": vis=" + win.isVisible());
-                //win.dump("  ");
+                //win.dump(" ");
                 if (visible) {
                     if (!win.isVisibleNow()) {
                         if (!runningAppAnimation) {
@@ -3704,7 +3705,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             // In the case where we are making an app visible
                             // but holding off for a transition, we still need
                             // to tell the client to make its windows visible so
-                            // they get drawn.  Otherwise, we will wait on
+                            // they get drawn. Otherwise, we will wait on
                             // performing the transition until all windows have
                             // been drawn, they never will be, and we are sad.
                             wtoken.clientHidden = false;
@@ -3930,13 +3931,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dumpAppTokensLocked() {
         for (int i=mAppTokens.size()-1; i>=0; i--) {
-            Slog.v(TAG, "  #" + i + ": " + mAppTokens.get(i).token);
+            Slog.v(TAG, " #" + i + ": " + mAppTokens.get(i).token);
         }
     }
 
     void dumpWindowsLocked() {
         for (int i=mWindows.size()-1; i>=0; i--) {
-            Slog.v(TAG, "  #" + i + ": " + mWindows.get(i));
+            Slog.v(TAG, " #" + i + ": " + mWindows.get(i));
         }
     }
 
@@ -4205,7 +4206,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private boolean shouldAllowDisableKeyguard()
     {
-        // We fail safe and prevent disabling keyguard in the unlikely event this gets 
+        // We fail safe and prevent disabling keyguard in the unlikely event this gets
         // called before DevicePolicyManagerService has started.
         if (mAllowDisableKeyguard == ALLOW_DISABLE_UNKNOWN) {
             DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
@@ -4541,10 +4542,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Apply a new rotation to the screen, respecting the requests of
-     * applications.  Use WindowManagerPolicy.USE_LAST_ROTATION to simply
+     * applications. Use WindowManagerPolicy.USE_LAST_ROTATION to simply
      * re-evaluate the desired rotation.
-     * 
-     * Returns null if the rotation has been changed.  In this case YOU
+     *
+     * Returns null if the rotation has been changed. In this case YOU
      * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
      */
     public boolean setRotationUncheckedLocked(int rotation, int animFlags) {
@@ -4683,7 +4684,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Stops the view server if it exists.
      *
      * @return True if the server stopped, false if it wasn't started or
-     *         couldn't be stopped.
+     * couldn't be stopped.
      *
      * @see com.android.server.ViewServer
      */
@@ -4795,7 +4796,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param parameters The command parameters.
      *
      * @return True if the command was successfully delivered, false otherwise. This does
-     *         not indicate whether the command itself was successful.
+     * not indicate whether the command itself was successful.
      */
     boolean viewServerWindowCommand(Socket client, String command, String parameters) {
         if (isSystemSecure()) {
@@ -4942,7 +4943,7 @@ public class WindowManagerService extends IWindowManager.Stub
             shortSize = (int)(shortSize/dm.density);
 
             // These semi-magic numbers define our compatibility modes for
-            // applications with different screens.  Don't change unless you
+            // applications with different screens. Don't change unless you
             // make sure to test lots and lots of apps!
             if (longSize < 470) {
                 // This is shorter than an HVGA normal density screen (which
@@ -5073,9 +5074,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (targetObj == null) {
             // In this case we are either dropping the event, or have received
-            // a move or up without a down.  It is common to receive move
+            // a move or up without a down. It is common to receive move
             // events in such a way, since this means the user is moving the
-            // pointer without actually pressing down.  All other cases should
+            // pointer without actually pressing down. All other cases should
             // be atypical, so let's log them.
             if (action != MotionEvent.ACTION_MOVE) {
                 Slog.w(TAG, "No window to dispatch pointer action " + ev.getAction());
@@ -5123,7 +5124,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (MEASURE_LATENCY) {
-            lt.sample("4 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
+            lt.sample("4 in dispatchPointer ", System.nanoTime() - eventTimeNano);
         }
 
         if ((target.mAttrs.flags &
@@ -5153,7 +5154,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if(mFatTouch) {
                         //two cases here
                         //an invalid down followed by 0 or moves(valid or invalid)
-                        //a valid down,  invalid move, more moves. want to ignore till up
+                        //a valid down, invalid move, more moves. want to ignore till up
                         returnFlag = true;
                     } else if(cheekPress) {
                         //valid down followed by invalid moves
@@ -5209,7 +5210,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (MEASURE_LATENCY) {
-            lt.sample("5 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
+            lt.sample("5 in dispatchPointer ", System.nanoTime() - eventTimeNano);
         }
 
         synchronized(mWindowMap) {
@@ -5271,7 +5272,7 @@ public class WindowManagerService extends IWindowManager.Stub
             target.mClient.dispatchPointer(ev, eventTime, true);
 
             if (MEASURE_LATENCY) {
-                lt.sample("7 after  svr->client ipc ", System.nanoTime() - eventTimeNano);
+                lt.sample("7 after svr->client ipc ", System.nanoTime() - eventTimeNano);
             }
             return INJECT_SUCCEEDED;
         } catch (android.os.RemoteException e) {
@@ -5365,6 +5366,59 @@ public class WindowManagerService extends IWindowManager.Stub
     private int dispatchKey(KeyEvent event, int pid, int uid) {
         if (DEBUG_INPUT) Slog.v(TAG, "Dispatch key: " + event);
 
+        final boolean hapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0;
+        final boolean customHapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.CUSTOM_HAPTIC_FEEDBACK_ENABLED, 0) == 0;
+        boolean DoVibrate = false;
+        String mKeyCode = "";
+
+        if (!hapticsDisabled) {
+            Vibrator mVibrator;
+            mVibrator = new Vibrator();
+
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (event.getRepeatCount() == 0)) {
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_MENU:
+                        DoVibrate = true;
+                        mKeyCode = "MENU";
+                        break;
+                    case KeyEvent.KEYCODE_HOME:
+                        DoVibrate = true;
+                        mKeyCode = "HOME";
+                        break;
+                    case KeyEvent.KEYCODE_BACK:
+                        DoVibrate = true;
+                        mKeyCode = "BACK";
+                        break;
+                    case KeyEvent.KEYCODE_SEARCH:
+                        DoVibrate = true;
+                        mKeyCode = "SEARCH";
+                        break;
+                    case KeyEvent.KEYCODE_VOLUME_UP:
+                        if (!customHapticsDisabled) {
+                            DoVibrate = true;
+                            mKeyCode = "VOLUME_UP";
+                        }
+                        break;
+                    case KeyEvent.KEYCODE_VOLUME_DOWN:
+                        if (!customHapticsDisabled) {
+                            DoVibrate = true;
+                            mKeyCode = "VOLUME_DOWN";
+                        }
+                        break;
+                }
+                if (DoVibrate) {
+                    if (DEBUG_INPUT) Slog.v(TAG, "##### Homebrew Vibration Action : " + mKeyCode + "#####");
+                    mVibrator.vibrate(
+                            Settings.System.getInt(
+                                mContext.getContentResolver(),
+                                Settings.System.HAPTIC_FEEDBACK_VIBRATION_VALUE, 30)
+                    );
+                }
+            }
+        }
+
         Object focusObj = mKeyWaiter.waitForNextEventTarget(event, null,
                 null, false, false, pid, uid);
         if (focusObj == null) {
@@ -5377,9 +5431,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Okay we have finished waiting for the last event to be processed.
         // First off, if this is a repeat event, check to see if there is
-        // a corresponding up event in the queue.  If there is, we will
+        // a corresponding up event in the queue. If there is, we will
         // just drop the repeat, because it makes no sense to repeat after
-        // the user has released a key.  (This is especially important for
+        // the user has released a key. (This is especially important for
         // long presses.)
         if (event.getRepeatCount() > 0 && mQueue.hasKeyUpEvent(event)) {
             return INJECT_SUCCEEDED;
@@ -5471,7 +5525,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Injects a keystroke event into the UI.
      *
-     * @param ev A motion event describing the keystroke action.  (Be sure to use
+     * @param ev A motion event describing the keystroke action. (Be sure to use
      * {@link SystemClock#uptimeMillis()} as the timebase.)
      * @param sync If true, wait for the event to be completed before returning to the caller.
      * @return Returns true if event was dispatched, false if it was dropped for any reason
@@ -5514,7 +5568,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Inject a pointer (touch) event into the UI.
      *
-     * @param ev A motion event describing the pointer (touch) action.  (As noted in
+     * @param ev A motion event describing the pointer (touch) action. (As noted in
      * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use
      * {@link SystemClock#uptimeMillis()} as the timebase.)
      * @param sync If true, wait for the event to be completed before returning to the caller.
@@ -5542,7 +5596,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Inject a trackball (navigation device) event into the UI.
      *
-     * @param ev A motion event describing the trackball action.  (As noted in
+     * @param ev A motion event describing the trackball action. (As noted in
      * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use
      * {@link SystemClock#uptimeMillis()} as the timebase.)
      * @param sync If true, wait for the event to be completed before returning to the caller.
@@ -5578,8 +5632,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * This class holds the state for dispatching key events.  This state
-     * is protected by the KeyWaiter instance, NOT by the window lock.  You
+     * This class holds the state for dispatching key events. This state
+     * is protected by the KeyWaiter instance, NOT by the window lock. You
      * can be holding the main window lock while acquire the KeyWaiter lock,
      * but not the other way around.
      */
@@ -5670,11 +5724,11 @@ public class WindowManagerService extends IWindowManager.Stub
             long waitedFor = 0;
 
             while (true) {
-                // Figure out which window we care about.  It is either the
+                // Figure out which window we care about. It is either the
                 // last window we are waiting to have process the event or,
                 // if none, then the next window we think the event should go
-                // to.  Note: we retrieve mLastWin outside of the lock, so
-                // it may change before we lock.  Thus we must check it again.
+                // to. Note: we retrieve mLastWin outside of the lock, so
+                // it may change before we lock. Thus we must check it again.
                 WindowState targetWin = mLastWin;
                 boolean targetIsNew = targetWin == null;
                 if (DEBUG_INPUT) Slog.v(
@@ -6207,7 +6261,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + newWindow.mToken.paused);
 
                 // Displaying a window implicitly causes dispatching to
-                // be unpaused.  (This is to protect against bugs if someone
+                // be unpaused. (This is to protect against bugs if someone
                 // pauses dispatching but forgets to resume.)
                 newWindow.mToken.paused = false;
 
@@ -6231,7 +6285,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // The new window is above the old; finish pending input to the last
                         // window and start directing it to the new one.
                         mLastWin.mToken.paused = false;
-                        doFinishedKeyLocked(false);  // does a notifyAll()
+                        doFinishedKeyLocked(false); // does a notifyAll()
                         return;
                     }
                 }
@@ -6312,7 +6366,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (force || mLastWin == null || !mLastWin.mToken.paused
                     || !mLastWin.isVisibleLw()) {
                 // If the current window has been paused, we aren't -really-
-                // finished...  so let the waiters still wait.
+                // finished... so let the waiters still wait.
                 mLastWin = null;
                 mLastBinder = null;
             }
@@ -6513,7 +6567,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ", repeat @ " + nextKeyTime);
 
                 // Retrieve next event, waiting only as long as the next
-                // repeat timeout.  If the configuration has changed, then
+                // repeat timeout. If the configuration has changed, then
                 // don't wait at all -- we'll report the change as soon as
                 // we have processed all events.
                 QueuedEvent ev = mQueue.getEvent(
@@ -6524,7 +6578,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         TAG, "Event: type=" + ev.classType + " data=" + ev.event);
 
                 if (MEASURE_LATENCY) {
-                    lt.sample("2 got event              ", System.nanoTime() - ev.whenNano);
+                    lt.sample("2 got event ", System.nanoTime() - ev.whenNano);
                 }
 
                 if (lastKey != null && !mPolicy.allowKeyRepeat()) {
@@ -6620,7 +6674,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else if (lastKey != null) {
                         curTime = SystemClock.uptimeMillis();
 
-                        // Timeout occurred while key was down.  If it is at or
+                        // Timeout occurred while key was down. If it is at or
                         // past the key repeat time, dispatch the repeat.
                         if (DEBUG_INPUT) Slog.v(
                             TAG, "Key timeout: repeat=" + nextKeyTime
@@ -6680,14 +6734,14 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mClientDead = false;
 
         /**
-         * Current pointer move event being dispatched to client window...  must
+         * Current pointer move event being dispatched to client window... must
          * hold key lock to access.
          */
         QueuedEvent mPendingPointerMove;
         WindowState mPendingPointerWindow;
 
         /**
-         * Current trackball move event being dispatched to client window...  must
+         * Current trackball move event being dispatched to client window... must
          * hold key lock to access.
          */
         QueuedEvent mPendingTrackballMove;
@@ -6893,7 +6947,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     TAG, "First window added to " + this + ", creating SurfaceSession");
                 mSurfaceSession = new SurfaceSession();
                 if (SHOW_TRANSACTIONS) Slog.i(
-                        TAG, "  NEW SURFACE SESSION " + mSurfaceSession);
+                        TAG, " NEW SURFACE SESSION " + mSurfaceSession);
                 mSessions.add(this);
             }
             mNumWindow++;
@@ -6912,7 +6966,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         TAG, "Last window removed from " + this
                         + ", destroying " + mSurfaceSession);
                     if (SHOW_TRANSACTIONS) Slog.i(
-                            TAG, "  KILL SURFACE SESSION " + mSurfaceSession);
+                            TAG, " KILL SURFACE SESSION " + mSurfaceSession);
                     try {
                         mSurfaceSession.kill();
                     } catch (Exception e) {
@@ -6975,9 +7029,9 @@ public class WindowManagerService extends IWindowManager.Stub
         Surface mSurface;
         boolean mReportDestroySurface;
         boolean mSurfacePendingDestroy;
-        boolean mAttachedHidden;    // is our parent window hidden?
-        boolean mLastHidden;        // was this window last hidden?
-        boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
+        boolean mAttachedHidden; // is our parent window hidden?
+        boolean mLastHidden; // was this window last hidden?
+        boolean mWallpaperVisible; // for wallpaper, what was last vis report?
         int mRequestedWidth;
         int mRequestedHeight;
         int mLastRequestedWidth;
@@ -7093,22 +7147,22 @@ public class WindowManagerService extends IWindowManager.Stub
         int mYOffset;
 
         // This is set after IWindowSession.relayout() has been called at
-        // least once for the window.  It allows us to detect the situation
+        // least once for the window. It allows us to detect the situation
         // where we don't yet have a surface, but should have one soon, so
         // we can give the window focus before waiting for the relayout.
         boolean mRelayoutCalled;
 
         // This is set after the Surface has been created but before the
-        // window has been drawn.  During this time the surface is hidden.
+        // window has been drawn. During this time the surface is hidden.
         boolean mDrawPending;
 
         // This is set after the window has finished drawing for the first
-        // time but before its surface is shown.  The surface will be
+        // time but before its surface is shown. The surface will be
         // displayed when the next layout is run.
         boolean mCommitDrawPending;
 
         // This is set during the time after the window's drawing has been
-        // committed, and before its surface is actually shown.  It is used
+        // committed, and before its surface is actually shown. It is used
         // to delay showing the surface until all windows in a token are ready
         // to be shown.
         boolean mReadyToShow;
@@ -7270,7 +7324,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int fh = frame.height();
 
             //System.out.println("In: w=" + w + " h=" + h + " container=" +
-            //                   container + " x=" + mAttrs.x + " y=" + mAttrs.y);
+            // container + " x=" + mAttrs.x + " y=" + mAttrs.y);
 
             Gravity.apply(mAttrs.gravity, w, h, container,
                     (int) (mAttrs.x + mAttrs.horizontalMargin * pw),
@@ -7311,7 +7365,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (localLOGV) {
                 //if ("com.google.android.youtube".equals(mAttrs.packageName)
-                //        && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+                // && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
                     Slog.v(TAG, "Resolving (mRequestedWidth="
                             + mRequestedWidth + ", mRequestedheight="
                             + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
@@ -7440,7 +7494,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             mSession.mSurfaceSession, mSession.mPid,
                             mAttrs.getTitle().toString(),
                             0, w, h, mAttrs.format, flags);
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  CREATE SURFACE "
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, " CREATE SURFACE "
                             + mSurface + " IN SESSION "
                             + mSession.mSurfaceSession
                             + ": pid=" + mSession.mPid + " format="
@@ -7499,7 +7553,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         void destroySurfaceLocked() {
             // Window is no longer on-screen, so can no longer receive
-            // key events...  if we were waiting for it to finish
+            // key events... if we were waiting for it to finish
             // handling a key event, the wait is over!
             mKeyWaiter.finishedKey(mSession, mClient, true,
                     KeyWaiter.RETURN_NOTHING);
@@ -7636,7 +7690,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             c.performShowLocked();
                             // It hadn't been shown, which means layout not
                             // performed on it, so now we want to make sure to
-                            // do a layout.  If called from within the transaction
+                            // do a layout. If called from within the transaction
                             // loop, this will cause it to restart with a new
                             // layout.
                             mLayoutNeeded = true;
@@ -7670,7 +7724,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return true;
         }
 
-        // This must be called while inside a transaction.  Returns true if
+        // This must be called while inside a transaction. Returns true if
         // there is more animation to run.
         boolean stepAnimationLocked(long currentTime, int dw, int dh) {
             if (!mDisplayFrozen && mPolicy.isScreenOn()) {
@@ -7709,10 +7763,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if ((!mLocalAnimating || mAnimationIsEntrance) && mAppToken != null
                         && mAppToken.animation != null) {
                     // When our app token is animating, we kind-of pretend like
-                    // we are as well.  Note the mLocalAnimating mAnimationIsEntrance
+                    // we are as well. Note the mLocalAnimating mAnimationIsEntrance
                     // part of this check means that we will only do this if
                     // our window is not currently exiting, or it is not
-                    // locally animating itself.  The idea being that one that
+                    // locally animating itself. The idea being that one that
                     // is exiting and doing a local animation should be removed
                     // once that animation is done.
                     mAnimating = true;
@@ -7913,7 +7967,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 int h = frame.height();
                 mShownFrame.set(x, y, x+w, y+h);
 
-                // Now set the alpha...  but because our current hardware
+                // Now set the alpha... but because our current hardware
                 // can't do alpha transformation on a non-opaque surface,
                 // turn it off if we are running an animation that is also
                 // transforming since it is more important to have that
@@ -7956,7 +8010,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /**
-         * Is this window visible?  It is not visible if there is no
+         * Is this window visible? It is not visible if there is no
          * surface, or we are in the process of running an exit animation
          * that will remove the surface, or its app token has been hidden.
          */
@@ -7969,11 +8023,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         /**
          * Like {@link #isVisibleLw}, but also counts a window that is currently
-         * "hidden" behind the keyguard as visible.  This allows us to apply
+         * "hidden" behind the keyguard as visible. This allows us to apply
          * things like window flags that impact the keyguard.
          * XXX I am starting to think we need to have ANOTHER visibility flag
          * for this "hidden behind keyguard" state rather than overloading
-         * mPolicyVisibility.  Ungh.
+         * mPolicyVisibility. Ungh.
          */
         public boolean isVisibleOrBehindKeyguardLw() {
             final AppWindowToken atoken = mAppToken;
@@ -7984,7 +8038,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /**
-         * Is this window visible, ignoring its app token?  It is not visible
+         * Is this window visible, ignoring its app token? It is not visible
          * if there is no surface, or we are in the process of running an exit animation
          * that will remove the surface.
          */
@@ -8018,7 +8072,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /**
-         * Is this window currently on-screen?  It is on-screen either if it
+         * Is this window currently on-screen? It is on-screen either if it
          * is visible or it is currently running an animation before no longer
          * being visible.
          */
@@ -8083,7 +8137,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         /**
          * Returns true if the window has a surface that it has drawn a
-         * complete UI in to.  Note that this returns true if the orientation
+         * complete UI in to. Note that this returns true if the orientation
          * is changing even if the window hasn't redrawn because we don't want
          * to stop things from executing during that time.
          */
@@ -8119,7 +8173,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /**
-         * Return true if the window is opaque and fully drawn.  This indicates
+         * Return true if the window is opaque and fully drawn. This indicates
          * it may obscure windows behind it.
          */
         boolean isOpaqueDrawn() {
@@ -8183,7 +8237,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         /** Returns true if this window desires key events. */
         public final boolean canReceiveKeys() {
-            return     isVisibleOrAdding()
+            return isVisibleOrAdding()
                     && (mViewVisibility == View.VISIBLE)
                     && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0);
         }
@@ -8500,7 +8554,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final IApplicationToken appToken;
 
         // All of the windows and child windows that are included in this
-        // application token.  Note this list is NOT sorted!
+        // application token. Note this list is NOT sorted!
         final ArrayList<WindowState> allAppWindows = new ArrayList<WindowState>();
 
         int groupId = -1;
@@ -8516,11 +8570,11 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean inPendingTransaction;
         boolean allDrawn;
 
-        // Is this token going to be hidden in a little while?  If so, it
+        // Is this token going to be hidden in a little while? If so, it
         // won't be taken into account for setting the screen orientation.
         boolean willBeHidden;
 
-        // Is this window's surface needed?  This is almost like hidden, except
+        // Is this window's surface needed? This is almost like hidden, except
         // it will sometimes be true a little earlier: when the token has
         // been shown, but is still waiting for its app transition to execute
         // before making its windows shown.
@@ -8648,7 +8702,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // We will run animations as long as the display isn't frozen.
 
                 if (animation == sDummyAnimation) {
-                    // This guy is going to animate, but not yet.  For now count
+                    // This guy is going to animate, but not yet. For now count
                     // it as not animating for purposes of scheduling transactions;
                     // when it is really time to animate, this will be set to
                     // a real animation and the next call will execute normally.
@@ -8865,7 +8919,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     // This is an animation that does nothing: it just immediately finishes
-    // itself every time it is called.  It is used as a stub animation in cases
+    // itself every time it is called. It is used as a stub animation in cases
     // where we want to synchronize multiple things that may be animating.
     static final class DummyAnimation extends Animation {
         public boolean getTransformation(long currentTime, Transformation outTransformation) {
@@ -8933,7 +8987,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         mLastFocus = newFocus;
                         //Slog.i(TAG, "Focus moving from " + lastFocus
-                        //        + " to " + newFocus);
+                        // + " to " + newFocus);
                         if (newFocus != null && lastFocus != null
                                 && !newFocus.isDisplayedLw()) {
                             //Slog.i(TAG, "Delaying loss of focus...");
@@ -8944,7 +8998,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (lastFocus != newFocus) {
                         //System.out.println("Changing focus from " + lastFocus
-                        //                   + " to " + newFocus);
+                        // + " to " + newFocus);
                         if (newFocus != null) {
                             try {
                                 //Slog.i(TAG, "Gaining focus: " + newFocus);
@@ -9342,8 +9396,8 @@ public class WindowManagerService extends IWindowManager.Stub
         lastWallpaper++;
         i = lastWallpaper;
 
-        // First add all of the exiting app tokens...  these are no longer
-        // in the main app list, but still have windows shown.  We put them
+        // First add all of the exiting app tokens... these are no longer
+        // in the main app list, but still have windows shown. We put them
         // in the back because now that the animation is over we no longer
         // will care about them.
         int NT = mExitingAppTokens.size();
@@ -9395,7 +9449,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYERS) Slog.v(TAG, "Assign layer " + w + ": "
                     + w.mAnimLayer);
             //System.out.println(
-            //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
+            // "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
         }
     }
 
@@ -9412,7 +9466,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mWaitingForConfig) {
             // Our configuration has changed (most likely rotation), but we
             // don't yet have the complete configuration to report to
-            // applications.  Don't do any window layout until we have it.
+            // applications. Don't do any window layout until we have it.
             return;
         }
         
@@ -9509,7 +9563,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_LAYOUT) Slog.v(TAG, "First pass " + win
                         + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
                         + " mLayoutAttached=" + win.mLayoutAttached);
-                if (DEBUG_LAYOUT && gone) Slog.v(TAG, "  (mViewVisibility="
+                if (DEBUG_LAYOUT && gone) Slog.v(TAG, " (mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
@@ -9519,7 +9573,7 @@ public class WindowManagerService extends IWindowManager.Stub
             
             // If this view is GONE, then skip it -- keep the current
             // frame, and let the caller know so they can ignore it
-            // if they want.  (We do the normal layout for INVISIBLE
+            // if they want. (We do the normal layout for INVISIBLE
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame) {
@@ -9545,7 +9599,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // If this view is GONE, then skip it -- keep the current
             // frame, and let the caller know so they can ignore it
-            // if they want.  (We do the normal layout for INVISIBLE
+            // if they want. (We do the normal layout for INVISIBLE
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (win.mLayoutAttached) {
@@ -9703,7 +9757,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         boolean wasAnimating = w.mAnimating;
                         if (w.stepAnimationLocked(currentTime, dw, dh)) {
                             animating = true;
-                            //w.dump("  ");
+                            //w.dump(" ");
                         }
                         if (wasAnimating && !w.mAnimating && mWallpaperTarget == w) {
                             wallpaperMayChange = true;
@@ -9732,7 +9786,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 if (changed) {
                                     if (wallpaperForceHidingChanged
                                             && w.isVisibleNow() /*w.isReadyForDisplay()*/) {
-                                        // Assume we will need to animate.  If
+                                        // Assume we will need to animate. If
                                         // we don't (because the wallpaper will
                                         // stay with the lock screen), then we will
                                         // clean up later.
@@ -9857,7 +9911,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + mAppTransitionTimeout + ")...");
                     if (!mDisplayFrozen && !mAppTransitionTimeout) {
                         // If the display isn't frozen, wait to do anything until
-                        // all of the apps are ready.  Otherwise just go because
+                        // all of the apps are ready. Otherwise just go because
                         // we'll unfreeze the display when everyone is ready.
                         for (i=0; i<NN && goodToGo; i++) {
                             AppWindowToken wtoken = mOpeningApps.get(i);
@@ -10006,7 +10060,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                         // If all closing windows are obscured, then there is
-                        // no need to do an animation.  This is the case, for
+                        // no need to do an animation. This is the case, for
                         // example, when this transition is being done behind
                         // the lock screen.
                         if (!mPolicy.allowAppAnimationsLw()) {
@@ -10062,12 +10116,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 int adjResult = 0;
 
                 if (!animating && mAppTransitionRunning) {
-                    // We have finished the animation of an app transition.  To do
+                    // We have finished the animation of an app transition. To do
                     // this, we have delayed a lot of operations like showing and
-                    // hiding apps, moving apps in Z-order, etc.  The app token list
+                    // hiding apps, moving apps in Z-order, etc. The app token list
                     // reflects the correct Z-order, but the window list may now
-                    // be out of sync with it.  So here we will just rebuild the
-                    // entire app window list.  Fun!
+                    // be out of sync with it. So here we will just rebuild the
+                    // entire app window list. Fun!
                     mAppTransitionRunning = false;
                     // Clear information about apps that were moving.
                     mToBottomApps.clear();
@@ -10086,7 +10140,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wallpaperForceHidingChanged && changes == 0 && !mAppTransitionReady) {
                     // At this point, there was a window with a wallpaper that
                     // was force hiding other windows behind it, but now it
-                    // is going away.  This may be simple -- just animate
+                    // is going away. This may be simple -- just animate
                     // away the wallpaper and its window -- or it may be
                     // hard -- the wallpaper now needs to be shown behind
                     // something that was hidden.
@@ -10101,7 +10155,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 " hiddenRequested=" + mLowerWallpaperTarget.mAppToken.hiddenRequested);
                         if (mLowerWallpaperTarget.mAppToken.hidden) {
                             // The lower target has become hidden before we
-                            // actually started the animation...  let's completely
+                            // actually started the animation... let's completely
                             // re-evaluate everything.
                             mLowerWallpaperTarget = mUpperWallpaperTarget = null;
                             changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
@@ -10138,7 +10192,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (wallpaperMayChange) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
-                            "Wallpaper may change!  Adjusting");
+                            "Wallpaper may change! Adjusting");
                     adjResult |= adjustWallpaperWindowsLocked();
                 }
 
@@ -10191,15 +10245,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int attrFlags = attrs.flags;
 
                 if (w.mSurface != null) {
-                    // XXX NOTE: The logic here could be improved.  We have
+                    // XXX NOTE: The logic here could be improved. We have
                     // the decision about whether to resize a window separated
-                    // from whether to hide the surface.  This can cause us to
-                    // resize a surface even if we are going to hide it.  You
+                    // from whether to hide the surface. This can cause us to
+                    // resize a surface even if we are going to hide it. You
                     // can see this by (1) holding device in landscape mode on
                     // home screen; (2) tapping browser icon (device will rotate
-                    // to landscape; (3) tap home.  The wallpaper will be resized
+                    // to landscape; (3) tap home. The wallpaper will be resized
                     // in step 2 but then immediately hidden, causing us to
-                    // have to resize and then redraw it again in step 3.  It
+                    // have to resize and then redraw it again in step 3. It
                     // would be nice to figure out how to avoid this, but it is
                     // difficult because we do need to resize surfaces in some
                     // cases while they are hidden such as when first showing a
@@ -10218,7 +10272,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mLastRequestedHeight != w.mRequestedHeight;
                         // for a scaled surface, we just want to use
                         // the requested size.
-                        width  = w.mRequestedWidth;
+                        width = w.mRequestedWidth;
                         height = w.mRequestedHeight;
                         w.mLastRequestedWidth = width;
                         w.mLastRequestedHeight = height;
@@ -10368,7 +10422,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         // If we are waiting for this window to handle an
                         // orientation change, well, it is hidden, so
-                        // doesn't really matter.  Note that this does
+                        // doesn't really matter. Note that this does
                         // introduce a potential glitch if the window
                         // becomes unhidden before it has drawn for the
                         // new orientation.
@@ -10550,7 +10604,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 //Slog.i(TAG, "BLUR BEHIND: " + w);
                                 blurring = true;
                                 if (mBlurSurface == null) {
-                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
+                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, " BLUR "
                                             + mBlurSurface + ": CREATE");
                                     try {
                                         mBlurSurface = new Surface(mFxSession, 0,
@@ -10563,7 +10617,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     }
                                 }
                                 if (mBlurSurface != null) {
-                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
+                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, " BLUR "
                                             + mBlurSurface + ": pos=(0,0) (" +
                                             dw + "x" + dh + "), layer=" + (w.mAnimLayer-1));
                                     mBlurSurface.setPosition(0, 0);
@@ -10571,7 +10625,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     mBlurSurface.setLayer(w.mAnimLayer-2);
                                     if (!mBlurShown) {
                                         try {
-                                            if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
+                                            if (SHOW_TRANSACTIONS) Slog.i(TAG, " BLUR "
                                                     + mBlurSurface + ": SHOW");
                                             mBlurSurface.show();
                                         } catch (RuntimeException e) {
@@ -10609,7 +10663,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (!blurring && mBlurShown) {
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR " + mBlurSurface
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, " BLUR " + mBlurSurface
                         + ": HIDE");
                 try {
                     mBlurSurface.hide();
@@ -10723,12 +10777,12 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean needRelayout = false;
 
         if (!animating && mAppTransitionRunning) {
-            // We have finished the animation of an app transition.  To do
+            // We have finished the animation of an app transition. To do
             // this, we have delayed a lot of operations like showing and
-            // hiding apps, moving apps in Z-order, etc.  The app token list
+            // hiding apps, moving apps in Z-order, etc. The app token list
             // reflects the correct Z-order, but the window list may now
-            // be out of sync with it.  So here we will just rebuild the
-            // entire app window list.  Fun!
+            // be out of sync with it. So here we will just rebuild the
+            // entire app window list. Fun!
             mAppTransitionRunning = false;
             needRelayout = true;
             rebuildAppWindowListLocked();
@@ -10793,7 +10847,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Have the surface flinger show a surface, robustly dealing with
-     * error conditions.  In particular, if there is not enough memory
+     * error conditions. In particular, if there is not enough memory
      * to show the surface, then we will try to get rid of other surfaces
      * in order to succeed.
      *
@@ -10833,12 +10887,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         long callingIdentity = Binder.clearCallingIdentity();
         try {
-            // There was some problem...   first, do a sanity check of the
+            // There was some problem... first, do a sanity check of the
             // window list to make sure we haven't left any dangling surfaces
             // around.
             int N = mWindows.size();
             boolean leakedSurface = false;
-            Slog.i(TAG, "Out of memory for surface!  Looking for leaks...");
+            Slog.i(TAG, "Out of memory for surface! Looking for leaks...");
             for (int i=0; i<N; i++) {
                 WindowState ws = (WindowState)mWindows.get(i);
                 if (ws.mSurface != null) {
@@ -10975,14 +11029,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // If there is a focused app, don't allow focus to go to any
-            // windows below it.  If this is an application window, step
+            // windows below it. If this is an application window, step
             // through the app tokens until we find its app.
             if (thisApp != null && nextApp != null && thisApp != nextApp
                     && win.mAttrs.type != TYPE_APPLICATION_STARTING) {
                 int origAppIndex = nextAppIndex;
                 while (nextAppIndex > 0) {
                     if (nextApp == mFocusedApp) {
-                        // Whoops, we are below the focused app...  no focus
+                        // Whoops, we are below the focused app... no focus
                         // for you!
                         if (localLOGV || DEBUG_FOCUS) Slog.v(
                             TAG, "Reached focused app: " + mFocusedApp);
@@ -10995,7 +11049,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 if (thisApp != nextApp) {
-                    // Uh oh, the app token doesn't exist!  This shouldn't
+                    // Uh oh, the app token doesn't exist! This shouldn't
                     // happen, but if it does we can get totally hosed...
                     // so restart at the original app.
                     nextAppIndex = origAppIndex;
@@ -11023,7 +11077,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // keep events from going astray while the display is reconfigured.
             // If someone has changed orientation again while the screen is
             // still frozen, the events will continue to be blocked while the
-            // successive orientation change is processed.  To prevent spurious
+            // successive orientation change is processed. To prevent spurious
             // ANRs, we reset the event dispatch timeout in this case.
             synchronized (mKeyWaiter) {
                 mKeyWaiter.mWasFrozen = true;
@@ -11037,7 +11091,7 @@ public class WindowManagerService extends IWindowManager.Stub
         //Slog.i(TAG, "Freezing, gc pending: " + mFreezeGcPending + ", now " + now);
         if (mFreezeGcPending != 0) {
             if (now > (mFreezeGcPending+1000)) {
-                //Slog.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
+                //Slog.i(TAG, "Gc! " + now + " > " + (mFreezeGcPending+1000));
                 mH.removeMessages(H.FORCE_GC);
                 Runtime.getRuntime().gc();
                 mFreezeGcPending = now;
@@ -11080,7 +11134,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         Surface.unfreezeDisplay(0);
 
-        // Reset the key delivery timeout on unfreeze, too.  We force a wakeup here
+        // Reset the key delivery timeout on unfreeze, too. We force a wakeup here
         // too because regular key delivery processing should resume immediately.
         synchronized (mKeyWaiter) {
             mKeyWaiter.mWasFrozen = true;
@@ -11088,7 +11142,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // While the display is frozen we don't re-compute the orientation
-        // to avoid inconsistent states.  However, something interesting
+        // to avoid inconsistent states. However, something interesting
         // could have actually changed during that time so re-evaluate it
         // now to catch that.
         if (updateOrientationFromAppTokensLocked()) {
@@ -11118,227 +11172,227 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         pw.println("Input State:");
-        mQueue.dump(pw, "  ");
+        mQueue.dump(pw, " ");
         pw.println(" ");
         
         synchronized(mWindowMap) {
             pw.println("Current Window Manager state:");
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
-                pw.print("  Window #"); pw.print(i); pw.print(' ');
+                pw.print(" Window #"); pw.print(i); pw.print(' ');
                         pw.print(w); pw.println(":");
-                w.dump(pw, "    ");
+                w.dump(pw, " ");
             }
             if (mInputMethodDialogs.size() > 0) {
                 pw.println(" ");
-                pw.println("  Input method dialogs:");
+                pw.println(" Input method dialogs:");
                 for (int i=mInputMethodDialogs.size()-1; i>=0; i--) {
                     WindowState w = mInputMethodDialogs.get(i);
-                    pw.print("  IM Dialog #"); pw.print(i); pw.print(": "); pw.println(w);
+                    pw.print(" IM Dialog #"); pw.print(i); pw.print(": "); pw.println(w);
                 }
             }
             if (mPendingRemove.size() > 0) {
                 pw.println(" ");
-                pw.println("  Remove pending for:");
+                pw.println(" Remove pending for:");
                 for (int i=mPendingRemove.size()-1; i>=0; i--) {
                     WindowState w = mPendingRemove.get(i);
-                    pw.print("  Remove #"); pw.print(i); pw.print(' ');
+                    pw.print(" Remove #"); pw.print(i); pw.print(' ');
                             pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                    w.dump(pw, " ");
                 }
             }
             if (mForceRemoves != null && mForceRemoves.size() > 0) {
                 pw.println(" ");
-                pw.println("  Windows force removing:");
+                pw.println(" Windows force removing:");
                 for (int i=mForceRemoves.size()-1; i>=0; i--) {
                     WindowState w = mForceRemoves.get(i);
-                    pw.print("  Removing #"); pw.print(i); pw.print(' ');
+                    pw.print(" Removing #"); pw.print(i); pw.print(' ');
                             pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                    w.dump(pw, " ");
                 }
             }
             if (mDestroySurface.size() > 0) {
                 pw.println(" ");
-                pw.println("  Windows waiting to destroy their surface:");
+                pw.println(" Windows waiting to destroy their surface:");
                 for (int i=mDestroySurface.size()-1; i>=0; i--) {
                     WindowState w = mDestroySurface.get(i);
-                    pw.print("  Destroy #"); pw.print(i); pw.print(' ');
+                    pw.print(" Destroy #"); pw.print(i); pw.print(' ');
                             pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                    w.dump(pw, " ");
                 }
             }
             if (mLosingFocus.size() > 0) {
                 pw.println(" ");
-                pw.println("  Windows losing focus:");
+                pw.println(" Windows losing focus:");
                 for (int i=mLosingFocus.size()-1; i>=0; i--) {
                     WindowState w = mLosingFocus.get(i);
-                    pw.print("  Losing #"); pw.print(i); pw.print(' ');
+                    pw.print(" Losing #"); pw.print(i); pw.print(' ');
                             pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                    w.dump(pw, " ");
                 }
             }
             if (mResizingWindows.size() > 0) {
                 pw.println(" ");
-                pw.println("  Windows waiting to resize:");
+                pw.println(" Windows waiting to resize:");
                 for (int i=mResizingWindows.size()-1; i>=0; i--) {
                     WindowState w = mResizingWindows.get(i);
-                    pw.print("  Resizing #"); pw.print(i); pw.print(' ');
+                    pw.print(" Resizing #"); pw.print(i); pw.print(' ');
                             pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                    w.dump(pw, " ");
                 }
             }
             if (mSessions.size() > 0) {
                 pw.println(" ");
-                pw.println("  All active sessions:");
+                pw.println(" All active sessions:");
                 Iterator<Session> it = mSessions.iterator();
                 while (it.hasNext()) {
                     Session s = it.next();
-                    pw.print("  Session "); pw.print(s); pw.println(':');
-                    s.dump(pw, "    ");
+                    pw.print(" Session "); pw.print(s); pw.println(':');
+                    s.dump(pw, " ");
                 }
             }
             if (mTokenMap.size() > 0) {
                 pw.println(" ");
-                pw.println("  All tokens:");
+                pw.println(" All tokens:");
                 Iterator<WindowToken> it = mTokenMap.values().iterator();
                 while (it.hasNext()) {
                     WindowToken token = it.next();
-                    pw.print("  Token "); pw.print(token.token); pw.println(':');
-                    token.dump(pw, "    ");
+                    pw.print(" Token "); pw.print(token.token); pw.println(':');
+                    token.dump(pw, " ");
                 }
             }
             if (mTokenList.size() > 0) {
                 pw.println(" ");
-                pw.println("  Window token list:");
+                pw.println(" Window token list:");
                 for (int i=0; i<mTokenList.size(); i++) {
-                    pw.print("  #"); pw.print(i); pw.print(": ");
+                    pw.print(" #"); pw.print(i); pw.print(": ");
                             pw.println(mTokenList.get(i));
                 }
             }
             if (mWallpaperTokens.size() > 0) {
                 pw.println(" ");
-                pw.println("  Wallpaper tokens:");
+                pw.println(" Wallpaper tokens:");
                 for (int i=mWallpaperTokens.size()-1; i>=0; i--) {
                     WindowToken token = mWallpaperTokens.get(i);
-                    pw.print("  Wallpaper #"); pw.print(i);
+                    pw.print(" Wallpaper #"); pw.print(i);
                             pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
+                    token.dump(pw, " ");
                 }
             }
             if (mAppTokens.size() > 0) {
                 pw.println(" ");
-                pw.println("  Application tokens in Z order:");
+                pw.println(" Application tokens in Z order:");
                 for (int i=mAppTokens.size()-1; i>=0; i--) {
-                    pw.print("  App #"); pw.print(i); pw.print(": ");
+                    pw.print(" App #"); pw.print(i); pw.print(": ");
                             pw.println(mAppTokens.get(i));
                 }
             }
             if (mFinishedStarting.size() > 0) {
                 pw.println(" ");
-                pw.println("  Finishing start of application tokens:");
+                pw.println(" Finishing start of application tokens:");
                 for (int i=mFinishedStarting.size()-1; i>=0; i--) {
                     WindowToken token = mFinishedStarting.get(i);
-                    pw.print("  Finished Starting #"); pw.print(i);
+                    pw.print(" Finished Starting #"); pw.print(i);
                             pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
+                    token.dump(pw, " ");
                 }
             }
             if (mExitingTokens.size() > 0) {
                 pw.println(" ");
-                pw.println("  Exiting tokens:");
+                pw.println(" Exiting tokens:");
                 for (int i=mExitingTokens.size()-1; i>=0; i--) {
                     WindowToken token = mExitingTokens.get(i);
-                    pw.print("  Exiting #"); pw.print(i);
+                    pw.print(" Exiting #"); pw.print(i);
                             pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
+                    token.dump(pw, " ");
                 }
             }
             if (mExitingAppTokens.size() > 0) {
                 pw.println(" ");
-                pw.println("  Exiting application tokens:");
+                pw.println(" Exiting application tokens:");
                 for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
                     WindowToken token = mExitingAppTokens.get(i);
-                    pw.print("  Exiting App #"); pw.print(i);
+                    pw.print(" Exiting App #"); pw.print(i);
                             pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
+                    token.dump(pw, " ");
                 }
             }
             pw.println(" ");
-            pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
-            pw.print("  mLastFocus="); pw.println(mLastFocus);
-            pw.print("  mFocusedApp="); pw.println(mFocusedApp);
-            pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
-            pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
-            pw.print("  mWallpaperTarget="); pw.println(mWallpaperTarget);
+            pw.print(" mCurrentFocus="); pw.println(mCurrentFocus);
+            pw.print(" mLastFocus="); pw.println(mLastFocus);
+            pw.print(" mFocusedApp="); pw.println(mFocusedApp);
+            pw.print(" mInputMethodTarget="); pw.println(mInputMethodTarget);
+            pw.print(" mInputMethodWindow="); pw.println(mInputMethodWindow);
+            pw.print(" mWallpaperTarget="); pw.println(mWallpaperTarget);
             if (mLowerWallpaperTarget != null && mUpperWallpaperTarget != null) {
-                pw.print("  mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
-                pw.print("  mUpperWallpaperTarget="); pw.println(mUpperWallpaperTarget);
+                pw.print(" mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
+                pw.print(" mUpperWallpaperTarget="); pw.println(mUpperWallpaperTarget);
             }
-            pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
-            pw.print("  mInTouchMode="); pw.print(mInTouchMode);
+            pw.print(" mCurConfiguration="); pw.println(this.mCurConfiguration);
+            pw.print(" mInTouchMode="); pw.print(mInTouchMode);
                     pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
-            pw.print("  mSystemBooted="); pw.print(mSystemBooted);
+            pw.print(" mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
-            pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
+            pw.print(" mLayoutNeeded="); pw.print(mLayoutNeeded);
                     pw.print(" mBlurShown="); pw.println(mBlurShown);
             if (mDimAnimator != null) {
                 mDimAnimator.printTo(pw);
             } else {
-                pw.println( "  no DimAnimator ");
+                pw.println( " no DimAnimator ");
             }
-            pw.print("  mInputMethodAnimLayerAdjustment=");
+            pw.print(" mInputMethodAnimLayerAdjustment=");
                     pw.print(mInputMethodAnimLayerAdjustment);
-                    pw.print("  mWallpaperAnimLayerAdjustment=");
+                    pw.print(" mWallpaperAnimLayerAdjustment=");
                     pw.println(mWallpaperAnimLayerAdjustment);
-            pw.print("  mLastWallpaperX="); pw.print(mLastWallpaperX);
+            pw.print(" mLastWallpaperX="); pw.print(mLastWallpaperX);
                     pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
-            pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
+            pw.print(" mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
                     pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
                     pw.print(" mWaitingForConfig="); pw.println(mWaitingForConfig);
-            pw.print("  mRotation="); pw.print(mRotation);
+            pw.print(" mRotation="); pw.print(mRotation);
                     pw.print(", mForcedAppOrientation="); pw.print(mForcedAppOrientation);
                     pw.print(", mRequestedRotation="); pw.println(mRequestedRotation);
-            pw.print("  mAnimationPending="); pw.print(mAnimationPending);
+            pw.print(" mAnimationPending="); pw.print(mAnimationPending);
                     pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
-            pw.print("  mNextAppTransition=0x");
+            pw.print(" mNextAppTransition=0x");
                     pw.print(Integer.toHexString(mNextAppTransition));
                     pw.print(", mAppTransitionReady="); pw.print(mAppTransitionReady);
                     pw.print(", mAppTransitionRunning="); pw.print(mAppTransitionRunning);
                     pw.print(", mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
             if (mNextAppTransitionPackage != null) {
-                pw.print("  mNextAppTransitionPackage=");
+                pw.print(" mNextAppTransitionPackage=");
                     pw.print(mNextAppTransitionPackage);
                     pw.print(", mNextAppTransitionEnter=0x");
                     pw.print(Integer.toHexString(mNextAppTransitionEnter));
                     pw.print(", mNextAppTransitionExit=0x");
                     pw.print(Integer.toHexString(mNextAppTransitionExit));
             }
-            pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
+            pw.print(" mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
             if (mLastEnterAnimToken != null || mLastEnterAnimToken != null) {
-                pw.print("  mLastEnterAnimToken="); pw.print(mLastEnterAnimToken);
+                pw.print(" mLastEnterAnimToken="); pw.print(mLastEnterAnimToken);
                         pw.print(", mLastEnterAnimParams="); pw.println(mLastEnterAnimParams);
             }
             if (mOpeningApps.size() > 0) {
-                pw.print("  mOpeningApps="); pw.println(mOpeningApps);
+                pw.print(" mOpeningApps="); pw.println(mOpeningApps);
             }
             if (mClosingApps.size() > 0) {
-                pw.print("  mClosingApps="); pw.println(mClosingApps);
+                pw.print(" mClosingApps="); pw.println(mClosingApps);
             }
             if (mToTopApps.size() > 0) {
-                pw.print("  mToTopApps="); pw.println(mToTopApps);
+                pw.print(" mToTopApps="); pw.println(mToTopApps);
             }
             if (mToBottomApps.size() > 0) {
-                pw.print("  mToBottomApps="); pw.println(mToBottomApps);
+                pw.print(" mToBottomApps="); pw.println(mToBottomApps);
             }
-            pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
+            pw.print(" DisplayWidth="); pw.print(mDisplay.getWidth());
                     pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
-            pw.println("  KeyWaiter state:");
-            pw.print("    mLastWin="); pw.print(mKeyWaiter.mLastWin);
+            pw.println(" KeyWaiter state:");
+            pw.print(" mLastWin="); pw.print(mKeyWaiter.mLastWin);
                     pw.print(" mLastBinder="); pw.println(mKeyWaiter.mLastBinder);
-            pw.print("    mFinished="); pw.print(mKeyWaiter.mFinished);
+            pw.print(" mFinished="); pw.print(mKeyWaiter.mFinished);
                     pw.print(" mGotFirstWindow="); pw.print(mKeyWaiter.mGotFirstWindow);
                     pw.print(" mEventDispatching="); pw.print(mKeyWaiter.mEventDispatching);
                     pw.print(" mTimeToSwitch="); pw.println(mKeyWaiter.mTimeToSwitch);
@@ -11371,7 +11425,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         DimAnimator (SurfaceSession session) {
             if (mDimSurface == null) {
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM "
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, " DIM "
                         + mDimSurface + ": CREATE");
                 try {
                     mDimSurface = new Surface(session, 0,
@@ -11389,7 +11443,7 @@ public class WindowManagerService extends IWindowManager.Stub
          */
         void show(int dw, int dh) {
             if (!mDimShown) {
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, " DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
                         dw + "x" + dh + ")");
                 mDimShown = true;
                 try {
@@ -11416,7 +11470,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mDimSurface.setLayer(w.mAnimLayer-1);
 
             final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM " + mDimSurface
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, " DIM " + mDimSurface
                     + ": layer=" + (w.mAnimLayer-1) + " target=" + target);
             if (mDimTargetAlpha != target) {
                 // If the desired dim level has changed, then
@@ -11476,7 +11530,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Do we need to continue animating?
                 if (more) {
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM "
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, " DIM "
                             + mDimSurface + ": alpha=" + mDimCurrentAlpha);
                     mLastDimAnimTime = currentTime;
                     mDimSurface.setAlpha(mDimCurrentAlpha);
@@ -11484,11 +11538,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else {
                     mDimCurrentAlpha = mDimTargetAlpha;
                     mLastDimAnimTime = 0;
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM "
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, " DIM "
                             + mDimSurface + ": final alpha=" + mDimCurrentAlpha);
                     mDimSurface.setAlpha(mDimCurrentAlpha);
                     if (!dimming) {
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM " + mDimSurface
+                        if (SHOW_TRANSACTIONS) Slog.i(TAG, " DIM " + mDimSurface
                                 + ": HIDE");
                         try {
                             mDimSurface.hide();
@@ -11503,7 +11557,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         public void printTo(PrintWriter pw) {
-            pw.print("  mDimShown="); pw.print(mDimShown);
+            pw.print(" mDimShown="); pw.print(mDimShown);
             pw.print(" current="); pw.print(mDimCurrentAlpha);
             pw.print(" target="); pw.print(mDimTargetAlpha);
             pw.print(" delta="); pw.print(mDimDeltaPerMs);
