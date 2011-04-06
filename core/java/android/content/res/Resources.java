@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2006 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package android.content.res;
 
@@ -41,25 +41,27 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
+import android.graphics.PorterDuff.Mode;
+
 /**
- * Class for accessing an application's resources.  This sits on top of the
- * asset manager of the application (accessible through getAssets()) and
- * provides a higher-level API for getting typed data from the assets.
- */
+* Class for accessing an application's resources. This sits on top of the
+* asset manager of the application (accessible through getAssets()) and
+* provides a higher-level API for getting typed data from the assets.
+*/
 public class Resources {
     static final String TAG = "Resources";
     private static final boolean DEBUG_LOAD = false;
     private static final boolean DEBUG_CONFIG = false;
     private static final boolean TRACE_FOR_PRELOAD = false;
 
-    // Use the current SDK version code.  If we are a development build,
+    // Use the current SDK version code. If we are a development build,
     // also allow the previous SDK version + 1.
     private static final int sSdkVersion = Build.VERSION.SDK_INT
             + ("REL".equals(Build.VERSION.CODENAME) ? 0 : 1);
     private static final Object mSync = new Object();
     private static Resources mSystem = null;
     
-    // Information about preloaded resources.  Note that they are not
+    // Information about preloaded resources. Note that they are not
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
     private static final LongSparseArray<Drawable.ConstantState> sPreloadedDrawables
@@ -108,9 +110,9 @@ public class Resources {
     }
 
     /**
-     * This exception is thrown by the resource APIs when a requested resource
-     * can not be found.
-     */
+* This exception is thrown by the resource APIs when a requested resource
+* can not be found.
+*/
     public static class NotFoundException extends RuntimeException {
         public NotFoundException() {
         }
@@ -121,32 +123,32 @@ public class Resources {
     }
 
     /**
-     * Create a new Resources object on top of an existing set of assets in an
-     * AssetManager.
-     * 
-     * @param assets Previously created AssetManager. 
-     * @param metrics Current display metrics to consider when 
-     *                selecting/computing resource values.
-     * @param config Desired device configuration to consider when 
-     *               selecting/computing resource values (optional).
-     */
+* Create a new Resources object on top of an existing set of assets in an
+* AssetManager.
+*
+* @param assets Previously created AssetManager.
+* @param metrics Current display metrics to consider when
+* selecting/computing resource values.
+* @param config Desired device configuration to consider when
+* selecting/computing resource values (optional).
+*/
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
         this(assets, metrics, config, (CompatibilityInfo) null);
     }
 
     /**
-     * Creates a new Resources object with CompatibilityInfo.
-     * 
-     * @param assets Previously created AssetManager. 
-     * @param metrics Current display metrics to consider when 
-     *                selecting/computing resource values.
-     * @param config Desired device configuration to consider when 
-     *               selecting/computing resource values (optional).
-     * @param compInfo this resource's compatibility info. It will use the default compatibility
-     *  info when it's null.
-     * @hide
-     */
+* Creates a new Resources object with CompatibilityInfo.
+*
+* @param assets Previously created AssetManager.
+* @param metrics Current display metrics to consider when
+* selecting/computing resource values.
+* @param config Desired device configuration to consider when
+* selecting/computing resource values (optional).
+* @param compInfo this resource's compatibility info. It will use the default compatibility
+* info when it's null.
+* @hide
+*/
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config, CompatibilityInfo compInfo) {
         mAssets = assets;
@@ -161,11 +163,11 @@ public class Resources {
     }
 
     /**
-     * Return a global shared Resources object that provides access to only
-     * system resources (no application resources), and is not configured for 
-     * the current screen (can not use dimension units, does not change based 
-     * on orientation, etc). 
-     */
+* Return a global shared Resources object that provides access to only
+* system resources (no application resources), and is not configured for
+* the current screen (can not use dimension units, does not change based
+* on orientation, etc).
+*/
     public static Resources getSystem() {
         synchronized (mSync) {
             Resources ret = mSystem;
@@ -179,20 +181,20 @@ public class Resources {
     }
 
     /**
-     * Return the string value associated with a particular resource ID.  The
-     * returned object will be a String if this is a plain string; it will be
-     * some other type of CharSequence if it is styled.
-     * {@more}
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return CharSequence The string data associated with the resource, plus
-     *         possibly styled text information.
-     */
+* Return the string value associated with a particular resource ID. The
+* returned object will be a String if this is a plain string; it will be
+* some other type of CharSequence if it is styled.
+* {@more}
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return CharSequence The string data associated with the resource, plus
+* possibly styled text information.
+*/
     public CharSequence getText(int id) throws NotFoundException {
         CharSequence res = mAssets.getResourceText(id);
         if (res != null) {
@@ -203,15 +205,15 @@ public class Resources {
     }
 
     /**
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return CharSequence The string data associated with the resource, plus
-     *         possibly styled text information.
-     */
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return CharSequence The string data associated with the resource, plus
+* possibly styled text information.
+*/
     public CharSequence getQuantityText(int id, int quantity) throws NotFoundException {
         PluralRules rule = getPluralRule();
         CharSequence res = mAssets.getResourceBagText(id, rule.attrForNumber(quantity));
@@ -237,19 +239,19 @@ public class Resources {
     }
 
     /**
-     * Return the string value associated with a particular resource ID.  It
-     * will be stripped of any styled text information.
-     * {@more}
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return String The string data associated with the resource,
-     * stripped of styled text information.
-     */
+* Return the string value associated with a particular resource ID. It
+* will be stripped of any styled text information.
+* {@more}
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return String The string data associated with the resource,
+* stripped of styled text information.
+*/
     public String getString(int id) throws NotFoundException {
         CharSequence res = getText(id);
         if (res != null) {
@@ -261,47 +263,47 @@ public class Resources {
 
 
     /**
-     * Return the string value associated with a particular resource ID,
-     * substituting the format arguments as defined in {@link java.util.Formatter}
-     * and {@link java.lang.String#format}. It will be stripped of any styled text
-     * information.
-     * {@more}
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *           
-     * @param formatArgs The format arguments that will be used for substitution.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return String The string data associated with the resource,
-     * stripped of styled text information.
-     */
+* Return the string value associated with a particular resource ID,
+* substituting the format arguments as defined in {@link java.util.Formatter}
+* and {@link java.lang.String#format}. It will be stripped of any styled text
+* information.
+* {@more}
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @param formatArgs The format arguments that will be used for substitution.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return String The string data associated with the resource,
+* stripped of styled text information.
+*/
     public String getString(int id, Object... formatArgs) throws NotFoundException {
         String raw = getString(id);
         return String.format(mConfiguration.locale, raw, formatArgs);
     }
 
     /**
-     * Return the string value associated with a particular resource ID for a particular
-     * numerical quantity, substituting the format arguments as defined in
-     * {@link java.util.Formatter} and {@link java.lang.String#format}. It will be
-     * stripped of any styled text information.
-     * {@more}
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * @param quantity The number used to get the correct string for the current language's
-     *           plural rules.
-     * @param formatArgs The format arguments that will be used for substitution.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return String The string data associated with the resource,
-     * stripped of styled text information.
-     */
+* Return the string value associated with a particular resource ID for a particular
+* numerical quantity, substituting the format arguments as defined in
+* {@link java.util.Formatter} and {@link java.lang.String#format}. It will be
+* stripped of any styled text information.
+* {@more}
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+* @param quantity The number used to get the correct string for the current language's
+* plural rules.
+* @param formatArgs The format arguments that will be used for substitution.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return String The string data associated with the resource,
+* stripped of styled text information.
+*/
     public String getQuantityString(int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
@@ -309,54 +311,54 @@ public class Resources {
     }
 
     /**
-     * Return the string value associated with a particular resource ID for a particular
-     * numerical quantity.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * @param quantity The number used to get the correct string for the current language's
-     *           plural rules.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return String The string data associated with the resource,
-     * stripped of styled text information.
-     */
+* Return the string value associated with a particular resource ID for a particular
+* numerical quantity.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+* @param quantity The number used to get the correct string for the current language's
+* plural rules.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return String The string data associated with the resource,
+* stripped of styled text information.
+*/
     public String getQuantityString(int id, int quantity) throws NotFoundException {
         return getQuantityText(id, quantity).toString();
     }
 
     /**
-     * Return the string value associated with a particular resource ID.  The
-     * returned object will be a String if this is a plain string; it will be
-     * some other type of CharSequence if it is styled.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * 
-     * @param def The default CharSequence to return.
-     *
-     * @return CharSequence The string data associated with the resource, plus
-     *         possibly styled text information, or def if id is 0 or not found.
-     */
+* Return the string value associated with a particular resource ID. The
+* returned object will be a String if this is a plain string; it will be
+* some other type of CharSequence if it is styled.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @param def The default CharSequence to return.
+*
+* @return CharSequence The string data associated with the resource, plus
+* possibly styled text information, or def if id is 0 or not found.
+*/
     public CharSequence getText(int id, CharSequence def) {
         CharSequence res = id != 0 ? mAssets.getResourceText(id) : null;
         return res != null ? res : def;
     }
 
     /**
-     * Return the styled text array associated with a particular resource ID.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return The styled text array associated with the resource.
-     */
+* Return the styled text array associated with a particular resource ID.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return The styled text array associated with the resource.
+*/
     public CharSequence[] getTextArray(int id) throws NotFoundException {
         CharSequence[] res = mAssets.getResourceTextArray(id);
         if (res != null) {
@@ -367,16 +369,16 @@ public class Resources {
     }
 
     /**
-     * Return the string array associated with a particular resource ID.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return The string array associated with the resource.
-     */
+* Return the string array associated with a particular resource ID.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return The string array associated with the resource.
+*/
     public String[] getStringArray(int id) throws NotFoundException {
         String[] res = mAssets.getResourceStringArray(id);
         if (res != null) {
@@ -387,16 +389,16 @@ public class Resources {
     }
 
     /**
-     * Return the int array associated with a particular resource ID.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return The int array associated with the resource.
-     */
+* Return the int array associated with a particular resource ID.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return The int array associated with the resource.
+*/
     public int[] getIntArray(int id) throws NotFoundException {
         int[] res = mAssets.getArrayIntResource(id);
         if (res != null) {
@@ -407,18 +409,18 @@ public class Resources {
     }
 
     /**
-     * Return an array of heterogeneous values.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return Returns a TypedArray holding an array of the array values.
-     * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
-     * when done with it.
-     */
+* Return an array of heterogeneous values.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns a TypedArray holding an array of the array values.
+* Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+* when done with it.
+*/
     public TypedArray obtainTypedArray(int id) throws NotFoundException {
         int len = mAssets.getArraySize(id);
         if (len < 0) {
@@ -434,22 +436,22 @@ public class Resources {
     }
 
     /**
-     * Retrieve a dimensional for a particular resource ID.  Unit 
-     * conversions are based on the current {@link DisplayMetrics} associated
-     * with the resources.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * 
-     * @return Resource dimension value multiplied by the appropriate 
-     * metric.
-     * 
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @see #getDimensionPixelOffset
-     * @see #getDimensionPixelSize
-     */
+* Retrieve a dimensional for a particular resource ID. Unit
+* conversions are based on the current {@link DisplayMetrics} associated
+* with the resources.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @return Resource dimension value multiplied by the appropriate
+* metric.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getDimensionPixelOffset
+* @see #getDimensionPixelSize
+*/
     public float getDimension(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -464,24 +466,24 @@ public class Resources {
     }
 
     /**
-     * Retrieve a dimensional for a particular resource ID for use
-     * as an offset in raw pixels.  This is the same as
-     * {@link #getDimension}, except the returned value is converted to
-     * integer pixels for you.  An offset conversion involves simply
-     * truncating the base value to an integer.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * 
-     * @return Resource dimension value multiplied by the appropriate 
-     * metric and truncated to integer pixels.
-     * 
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @see #getDimension
-     * @see #getDimensionPixelSize
-     */
+* Retrieve a dimensional for a particular resource ID for use
+* as an offset in raw pixels. This is the same as
+* {@link #getDimension}, except the returned value is converted to
+* integer pixels for you. An offset conversion involves simply
+* truncating the base value to an integer.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @return Resource dimension value multiplied by the appropriate
+* metric and truncated to integer pixels.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getDimension
+* @see #getDimensionPixelSize
+*/
     public int getDimensionPixelOffset(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -497,25 +499,25 @@ public class Resources {
     }
 
     /**
-     * Retrieve a dimensional for a particular resource ID for use
-     * as a size in raw pixels.  This is the same as
-     * {@link #getDimension}, except the returned value is converted to
-     * integer pixels for use as a size.  A size conversion involves
-     * rounding the base value, and ensuring that a non-zero base value
-     * is at least one pixel in size.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * 
-     * @return Resource dimension value multiplied by the appropriate 
-     * metric and truncated to integer pixels.
-     *  
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @see #getDimension
-     * @see #getDimensionPixelOffset
-     */
+* Retrieve a dimensional for a particular resource ID for use
+* as a size in raw pixels. This is the same as
+* {@link #getDimension}, except the returned value is converted to
+* integer pixels for use as a size. A size conversion involves
+* rounding the base value, and ensuring that a non-zero base value
+* is at least one pixel in size.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @return Resource dimension value multiplied by the appropriate
+* metric and truncated to integer pixels.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getDimension
+* @see #getDimensionPixelOffset
+*/
     public int getDimensionPixelSize(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -531,22 +533,22 @@ public class Resources {
     }
 
     /**
-     * Retrieve a fractional unit for a particular resource ID.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * @param base The base value of this fraction.  In other words, a 
-     *             standard fraction is multiplied by this value.
-     * @param pbase The parent base value of this fraction.  In other 
-     *             words, a parent fraction (nn%p) is multiplied by this
-     *             value.
-     * 
-     * @return Attribute fractional value multiplied by the appropriate 
-     * base value.
-     *  
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     */
+* Retrieve a fractional unit for a particular resource ID.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+* @param base The base value of this fraction. In other words, a
+* standard fraction is multiplied by this value.
+* @param pbase The parent base value of this fraction. In other
+* words, a parent fraction (nn%p) is multiplied by this
+* value.
+*
+* @return Attribute fractional value multiplied by the appropriate
+* base value.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*/
     public float getFraction(int id, int base, int pbase) {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -561,19 +563,19 @@ public class Resources {
     }
     
     /**
-     * Return a drawable object associated with a particular resource ID.
-     * Various types of objects will be returned depending on the underlying
-     * resource -- for example, a solid color, PNG image, scalable image, etc.
-     * The Drawable API hides these implementation details.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @return Drawable An object that can be used to draw this resource.
-     */
+* Return a drawable object associated with a particular resource ID.
+* Various types of objects will be returned depending on the underlying
+* resource -- for example, a solid color, PNG image, scalable image, etc.
+* The Drawable API hides these implementation details.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Drawable An object that can be used to draw this resource.
+*/
     public Drawable getDrawable(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -582,14 +584,49 @@ public class Resources {
         }
     }
 
+    
     /**
-     * Return a movie object associated with the particular resource ID.
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     */
+* Return a drawable object associated with a particular resource ID.
+* Various types of objects will be returned depending on the underlying
+* resource -- for example, a solid color, PNG image, scalable image, etc.
+* The Drawable API hides these implementation details.
+*
+* mtwebster:
+* This version also applies a Porter Duff color mask onto the object before
+* returning the object. Put in Resources to give reusability, I plan on
+* applying this to other parts of the gui
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @param mask The color mask to use (alpha-r-g-b)
+*
+* @param masktype The Porter Duff filter mode
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Drawable An object that can be used to draw this resource.
+* @hide
+*/
+    public Drawable getDrawable(int id, int mask, Mode maskType) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            Drawable tmpDrawable = loadDrawable(value, id);
+            tmpDrawable.setColorFilter(mask, maskType);
+            return tmpDrawable;
+        }
+    }
+    
+    /**
+* Return a movie object associated with the particular resource ID.
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+*/
     public Movie getMovie(int id) throws NotFoundException {
         InputStream is = openRawResource(id);
         Movie movie = Movie.decodeStream(is);
@@ -603,19 +640,19 @@ public class Resources {
     }
 
     /**
-     * Return a color integer associated with a particular resource ID.
-     * If the resource holds a complex
-     * {@link android.content.res.ColorStateList}, then the default color from
-     * the set is returned.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return Returns a single color value in the form 0xAARRGGBB.
-     */
+* Return a color integer associated with a particular resource ID.
+* If the resource holds a complex
+* {@link android.content.res.ColorStateList}, then the default color from
+* the set is returned.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns a single color value in the form 0xAARRGGBB.
+*/
     public int getColor(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -634,19 +671,19 @@ public class Resources {
     }
 
     /**
-     * Return a color state list associated with a particular resource ID.  The
-     * resource may contain either a single raw color value, or a complex
-     * {@link android.content.res.ColorStateList} holding multiple possible colors.
-     *
-     * @param id The desired resource identifier of a {@link ColorStateList},
-     *        as generated by the aapt tool. This integer encodes the package, type, and resource
-     *        entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return Returns a ColorStateList object containing either a single
-     * solid color or multiple colors that can be selected based on a state.
-     */
+* Return a color state list associated with a particular resource ID. The
+* resource may contain either a single raw color value, or a complex
+* {@link android.content.res.ColorStateList} holding multiple possible colors.
+*
+* @param id The desired resource identifier of a {@link ColorStateList},
+* as generated by the aapt tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns a ColorStateList object containing either a single
+* solid color or multiple colors that can be selected based on a state.
+*/
     public ColorStateList getColorStateList(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -656,18 +693,18 @@ public class Resources {
     }
 
     /**
-     * Return a boolean associated with a particular resource ID.  This can be
-     * used with any integral resource value, and will return true if it is
-     * non-zero.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return Returns the boolean value contained in the resource.
-     */
+* Return a boolean associated with a particular resource ID. This can be
+* used with any integral resource value, and will return true if it is
+* non-zero.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns the boolean value contained in the resource.
+*/
     public boolean getBoolean(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -683,16 +720,16 @@ public class Resources {
     }
 
     /**
-     * Return an integer associated with a particular resource ID.
-     *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return Returns the integer value contained in the resource.
-     */
+* Return an integer associated with a particular resource ID.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns the integer value contained in the resource.
+*/
     public int getInteger(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -708,92 +745,92 @@ public class Resources {
     }
 
     /**
-     * Return an XmlResourceParser through which you can read a view layout
-     * description for the given resource ID.  This parser has limited
-     * functionality -- in particular, you can't change its input, and only
-     * the high-level events are available.
-     * 
-     * <p>This function is really a simple wrapper for calling
-     * {@link #getXml} with a layout resource.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @return A new parser object through which you can read
-     *         the XML data.
-     *         
-     * @see #getXml
-     */
+* Return an XmlResourceParser through which you can read a view layout
+* description for the given resource ID. This parser has limited
+* functionality -- in particular, you can't change its input, and only
+* the high-level events are available.
+*
+* <p>This function is really a simple wrapper for calling
+* {@link #getXml} with a layout resource.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return A new parser object through which you can read
+* the XML data.
+*
+* @see #getXml
+*/
     public XmlResourceParser getLayout(int id) throws NotFoundException {
         return loadXmlResourceParser(id, "layout");
     }
 
     /**
-     * Return an XmlResourceParser through which you can read an animation
-     * description for the given resource ID.  This parser has limited
-     * functionality -- in particular, you can't change its input, and only
-     * the high-level events are available.
-     * 
-     * <p>This function is really a simple wrapper for calling
-     * {@link #getXml} with an animation resource.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @return A new parser object through which you can read
-     *         the XML data.
-     *         
-     * @see #getXml
-     */
+* Return an XmlResourceParser through which you can read an animation
+* description for the given resource ID. This parser has limited
+* functionality -- in particular, you can't change its input, and only
+* the high-level events are available.
+*
+* <p>This function is really a simple wrapper for calling
+* {@link #getXml} with an animation resource.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return A new parser object through which you can read
+* the XML data.
+*
+* @see #getXml
+*/
     public XmlResourceParser getAnimation(int id) throws NotFoundException {
         return loadXmlResourceParser(id, "anim");
     }
 
     /**
-     * Return an XmlResourceParser through which you can read a generic XML
-     * resource for the given resource ID.
-     * 
-     * <p>The XmlPullParser implementation returned here has some limited
-     * functionality.  In particular, you can't change its input, and only
-     * high-level parsing events are available (since the document was
-     * pre-parsed for you at build time, which involved merging text and
-     * stripping comments).
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @return A new parser object through which you can read
-     *         the XML data.
-     *         
-     * @see android.util.AttributeSet
-     */
+* Return an XmlResourceParser through which you can read a generic XML
+* resource for the given resource ID.
+*
+* <p>The XmlPullParser implementation returned here has some limited
+* functionality. In particular, you can't change its input, and only
+* high-level parsing events are available (since the document was
+* pre-parsed for you at build time, which involved merging text and
+* stripping comments).
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return A new parser object through which you can read
+* the XML data.
+*
+* @see android.util.AttributeSet
+*/
     public XmlResourceParser getXml(int id) throws NotFoundException {
         return loadXmlResourceParser(id, "xml");
     }
 
     /**
-     * Open a data stream for reading a raw resource.  This can only be used
-     * with resources whose value is the name of an asset files -- that is, it can be
-     * used to open drawable, sound, and raw resources; it will fail on string
-     * and color resources.
-     * 
-     * @param id The resource identifier to open, as generated by the appt
-     *           tool.
-     * 
-     * @return InputStream Access to the resource data.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     */
+* Open a data stream for reading a raw resource. This can only be used
+* with resources whose value is the name of an asset files -- that is, it can be
+* used to open drawable, sound, and raw resources; it will fail on string
+* and color resources.
+*
+* @param id The resource identifier to open, as generated by the appt
+* tool.
+*
+* @return InputStream Access to the resource data.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+*/
     public InputStream openRawResource(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             return openRawResource(id, mTmpValue);
@@ -801,18 +838,18 @@ public class Resources {
     }
 
     /**
-     * Open a data stream for reading a raw resource.  This can only be used
-     * with resources whose value is the name of an asset file -- that is, it can be
-     * used to open drawable, sound, and raw resources; it will fail on string
-     * and color resources.
-     *
-     * @param id The resource identifier to open, as generated by the appt tool.
-     * @param value The TypedValue object to hold the resource information.
-     *
-     * @return InputStream Access to the resource data.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     */
+* Open a data stream for reading a raw resource. This can only be used
+* with resources whose value is the name of an asset file -- that is, it can be
+* used to open drawable, sound, and raw resources; it will fail on string
+* and color resources.
+*
+* @param id The resource identifier to open, as generated by the appt tool.
+* @param value The TypedValue object to hold the resource information.
+*
+* @return InputStream Access to the resource data.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*/
     public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
         getValue(id, value, true);
 
@@ -828,26 +865,26 @@ public class Resources {
     }
 
     /**
-     * Open a file descriptor for reading a raw resource.  This can only be used
-     * with resources whose value is the name of an asset files -- that is, it can be
-     * used to open drawable, sound, and raw resources; it will fail on string
-     * and color resources.
-     * 
-     * <p>This function only works for resources that are stored in the package
-     * as uncompressed data, which typically includes things like mp3 files
-     * and png images.
-     * 
-     * @param id The resource identifier to open, as generated by the appt
-     *           tool.
-     * 
-     * @return AssetFileDescriptor A new file descriptor you can use to read
-     * the resource.  This includes the file descriptor itself, as well as the
-     * offset and length of data where the resource appears in the file.  A
-     * null is returned if the file exists but is compressed.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     */
+* Open a file descriptor for reading a raw resource. This can only be used
+* with resources whose value is the name of an asset files -- that is, it can be
+* used to open drawable, sound, and raw resources; it will fail on string
+* and color resources.
+*
+* <p>This function only works for resources that are stored in the package
+* as uncompressed data, which typically includes things like mp3 files
+* and png images.
+*
+* @param id The resource identifier to open, as generated by the appt
+* tool.
+*
+* @return AssetFileDescriptor A new file descriptor you can use to read
+* the resource. This includes the file descriptor itself, as well as the
+* offset and length of data where the resource appears in the file. A
+* null is returned if the file exists but is compressed.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+*/
     public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
         synchronized (mTmpValue) {
             TypedValue value = mTmpValue;
@@ -869,20 +906,20 @@ public class Resources {
     }
 
     /**
-     * Return the raw data associated with a particular resource ID.
-     * 
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
-     * @param outValue Object in which to place the resource data.
-     * @param resolveRefs If true, a resource that is a reference to another
-     *                    resource will be followed so that you receive the
-     *                    actual final resource data.  If false, the TypedValue
-     *                    will be filled in with the reference itself.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     */
+* Return the raw data associated with a particular resource ID.
+*
+* @param id The desired resource identifier, as generated by the aapt
+* tool. This integer encodes the package, type, and resource
+* entry. The value 0 is an invalid identifier.
+* @param outValue Object in which to place the resource data.
+* @param resolveRefs If true, a resource that is a reference to another
+* resource will be followed so that you receive the
+* actual final resource data. If false, the TypedValue
+* will be filled in with the reference itself.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+*/
     public void getValue(int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, outValue, resolveRefs);
@@ -894,25 +931,25 @@ public class Resources {
     }
 
     /**
-     * Return the raw data associated with a particular resource ID.
-     * See getIdentifier() for information on how names are mapped to resource
-     * IDs, and getString(int) for information on how string resources are
-     * retrieved.
-     * 
-     * <p>Note: use of this function is discouraged.  It is much more
-     * efficient to retrieve resources by identifier than by name.
-     * 
-     * @param name The name of the desired resource.  This is passed to
-     *             getIdentifier() with a default type of "string".
-     * @param outValue Object in which to place the resource data.
-     * @param resolveRefs If true, a resource that is a reference to another
-     *                    resource will be followed so that you receive the
-     *                    actual final resource data.  If false, the TypedValue
-     *                    will be filled in with the reference itself.
-     *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     */
+* Return the raw data associated with a particular resource ID.
+* See getIdentifier() for information on how names are mapped to resource
+* IDs, and getString(int) for information on how string resources are
+* retrieved.
+*
+* <p>Note: use of this function is discouraged. It is much more
+* efficient to retrieve resources by identifier than by name.
+*
+* @param name The name of the desired resource. This is passed to
+* getIdentifier() with a default type of "string".
+* @param outValue Object in which to place the resource data.
+* @param resolveRefs If true, a resource that is a reference to another
+* resource will be followed so that you receive the
+* actual final resource data. If false, the TypedValue
+* will be filled in with the reference itself.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+*/
     public void getValue(String name, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         int id = getIdentifier(name, "string", null);
@@ -924,74 +961,74 @@ public class Resources {
     }
 
     /**
-     * This class holds the current attribute values for a particular theme.
-     * In other words, a Theme is a set of values for resource attributes;
-     * these are used in conjunction with {@link TypedArray}
-     * to resolve the final value for an attribute.
-     * 
-     * <p>The Theme's attributes come into play in two ways: (1) a styled
-     * attribute can explicit reference a value in the theme through the
-     * "?themeAttribute" syntax; (2) if no value has been defined for a
-     * particular styled attribute, as a last resort we will try to find that
-     * attribute's value in the Theme.
-     * 
-     * <p>You will normally use the {@link #obtainStyledAttributes} APIs to
-     * retrieve XML attributes with style and theme information applied.
-     */
+* This class holds the current attribute values for a particular theme.
+* In other words, a Theme is a set of values for resource attributes;
+* these are used in conjunction with {@link TypedArray}
+* to resolve the final value for an attribute.
+*
+* <p>The Theme's attributes come into play in two ways: (1) a styled
+* attribute can explicit reference a value in the theme through the
+* "?themeAttribute" syntax; (2) if no value has been defined for a
+* particular styled attribute, as a last resort we will try to find that
+* attribute's value in the Theme.
+*
+* <p>You will normally use the {@link #obtainStyledAttributes} APIs to
+* retrieve XML attributes with style and theme information applied.
+*/
     public final class Theme {
         /**
-         * Place new attribute values into the theme.  The style resource
-         * specified by <var>resid</var> will be retrieved from this Theme's
-         * resources, its values placed into the Theme object.
-         * 
-         * <p>The semantics of this function depends on the <var>force</var>
-         * argument:  If false, only values that are not already defined in
-         * the theme will be copied from the system resource; otherwise, if
-         * any of the style's attributes are already defined in the theme, the
-         * current values in the theme will be overwritten.
-         * 
-         * @param resid The resource ID of a style resource from which to
-         *              obtain attribute values.
-         * @param force If true, values in the style resource will always be
-         *              used in the theme; otherwise, they will only be used
-         *              if not already defined in the theme.
-         */
+* Place new attribute values into the theme. The style resource
+* specified by <var>resid</var> will be retrieved from this Theme's
+* resources, its values placed into the Theme object.
+*
+* <p>The semantics of this function depends on the <var>force</var>
+* argument: If false, only values that are not already defined in
+* the theme will be copied from the system resource; otherwise, if
+* any of the style's attributes are already defined in the theme, the
+* current values in the theme will be overwritten.
+*
+* @param resid The resource ID of a style resource from which to
+* obtain attribute values.
+* @param force If true, values in the style resource will always be
+* used in the theme; otherwise, they will only be used
+* if not already defined in the theme.
+*/
         public void applyStyle(int resid, boolean force) {
             AssetManager.applyThemeStyle(mTheme, resid, force);
         }
 
         /**
-         * Set this theme to hold the same contents as the theme
-         * <var>other</var>.  If both of these themes are from the same
-         * Resources object, they will be identical after this function
-         * returns.  If they are from different Resources, only the resources
-         * they have in common will be set in this theme.
-         * 
-         * @param other The existing Theme to copy from.
-         */
+* Set this theme to hold the same contents as the theme
+* <var>other</var>. If both of these themes are from the same
+* Resources object, they will be identical after this function
+* returns. If they are from different Resources, only the resources
+* they have in common will be set in this theme.
+*
+* @param other The existing Theme to copy from.
+*/
         public void setTo(Theme other) {
             AssetManager.copyTheme(mTheme, other.mTheme);
         }
 
         /**
-         * Return a StyledAttributes holding the values defined by
-         * <var>Theme</var> which are listed in <var>attrs</var>.
-         * 
-         * <p>Be sure to call StyledAttributes.recycle() when you are done with
-         * the array.
-         * 
-         * @param attrs The desired attributes.
-         *
-         * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-         * 
-         * @return Returns a TypedArray holding an array of the attribute values.
-         * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
-         * when done with it.
-         * 
-         * @see Resources#obtainAttributes
-         * @see #obtainStyledAttributes(int, int[])
-         * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
-         */
+* Return a StyledAttributes holding the values defined by
+* <var>Theme</var> which are listed in <var>attrs</var>.
+*
+* <p>Be sure to call StyledAttributes.recycle() when you are done with
+* the array.
+*
+* @param attrs The desired attributes.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns a TypedArray holding an array of the attribute values.
+* Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+* when done with it.
+*
+* @see Resources#obtainAttributes
+* @see #obtainStyledAttributes(int, int[])
+* @see #obtainStyledAttributes(AttributeSet, int[], int, int)
+*/
         public TypedArray obtainStyledAttributes(int[] attrs) {
             int len = attrs.length;
             TypedArray array = getCachedStyledAttributes(len);
@@ -1002,25 +1039,25 @@ public class Resources {
         }
 
         /**
-         * Return a StyledAttributes holding the values defined by the style
-         * resource <var>resid</var> which are listed in <var>attrs</var>.
-         * 
-         * <p>Be sure to call StyledAttributes.recycle() when you are done with
-         * the array.
-         * 
-         * @param resid The desired style resource.
-         * @param attrs The desired attributes in the style.
-         * 
-         * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-         * 
-         * @return Returns a TypedArray holding an array of the attribute values.
-         * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
-         * when done with it.
-         * 
-         * @see Resources#obtainAttributes
-         * @see #obtainStyledAttributes(int[])
-         * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
-         */
+* Return a StyledAttributes holding the values defined by the style
+* resource <var>resid</var> which are listed in <var>attrs</var>.
+*
+* <p>Be sure to call StyledAttributes.recycle() when you are done with
+* the array.
+*
+* @param resid The desired style resource.
+* @param attrs The desired attributes in the style.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @return Returns a TypedArray holding an array of the attribute values.
+* Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+* when done with it.
+*
+* @see Resources#obtainAttributes
+* @see #obtainStyledAttributes(int[])
+* @see #obtainStyledAttributes(AttributeSet, int[], int, int)
+*/
         public TypedArray obtainStyledAttributes(int resid, int[] attrs)
                 throws NotFoundException {
             int len = attrs.length;
@@ -1036,13 +1073,13 @@ public class Resources {
                 System.out.println("**********************************************************");
                 System.out.println("**********************************************************");
                 System.out.println("Attributes:");
-                String s = "  Attrs:";
+                String s = " Attrs:";
                 int i;
                 for (i=0; i<attrs.length; i++) {
                     s = s + " 0x" + Integer.toHexString(attrs[i]);
                 }
                 System.out.println(s);
-                s = "  Found:";
+                s = " Found:";
                 TypedValue value = new TypedValue();
                 for (i=0; i<attrs.length; i++) {
                     int d = i*AssetManager.STYLE_NUM_ENTRIES;
@@ -1059,53 +1096,53 @@ public class Resources {
         }
 
         /**
-         * Return a StyledAttributes holding the attribute values in
-         * <var>set</var>
-         * that are listed in <var>attrs</var>.  In addition, if the given
-         * AttributeSet specifies a style class (through the "style" attribute),
-         * that style will be applied on top of the base attributes it defines.
-         * 
-         * <p>Be sure to call StyledAttributes.recycle() when you are done with
-         * the array.
-         * 
-         * <p>When determining the final value of a particular attribute, there
-         * are four inputs that come into play:</p>
-         * 
-         * <ol>
-         *     <li> Any attribute values in the given AttributeSet.
-         *     <li> The style resource specified in the AttributeSet (named
-         *     "style").
-         *     <li> The default style specified by <var>defStyleAttr</var> and
-         *     <var>defStyleRes</var>
-         *     <li> The base values in this theme.
-         * </ol>
-         * 
-         * <p>Each of these inputs is considered in-order, with the first listed
-         * taking precedence over the following ones.  In other words, if in the
-         * AttributeSet you have supplied <code>&lt;Button
-         * textColor="#ff000000"&gt;</code>, then the button's text will
-         * <em>always</em> be black, regardless of what is specified in any of
-         * the styles.
-         * 
-         * @param set The base set of attribute values.  May be null.
-         * @param attrs The desired attributes to be retrieved.
-         * @param defStyleAttr An attribute in the current theme that contains a
-         *                     reference to a style resource that supplies
-         *                     defaults values for the StyledAttributes.  Can be
-         *                     0 to not look for defaults.
-         * @param defStyleRes A resource identifier of a style resource that
-         *                    supplies default values for the StyledAttributes,
-         *                    used only if defStyleAttr is 0 or can not be found
-         *                    in the theme.  Can be 0 to not look for defaults.
-         * 
-         * @return Returns a TypedArray holding an array of the attribute values.
-         * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
-         * when done with it.
-         * 
-         * @see Resources#obtainAttributes
-         * @see #obtainStyledAttributes(int[])
-         * @see #obtainStyledAttributes(int, int[])
-         */
+* Return a StyledAttributes holding the attribute values in
+* <var>set</var>
+* that are listed in <var>attrs</var>. In addition, if the given
+* AttributeSet specifies a style class (through the "style" attribute),
+* that style will be applied on top of the base attributes it defines.
+*
+* <p>Be sure to call StyledAttributes.recycle() when you are done with
+* the array.
+*
+* <p>When determining the final value of a particular attribute, there
+* are four inputs that come into play:</p>
+*
+* <ol>
+* <li> Any attribute values in the given AttributeSet.
+* <li> The style resource specified in the AttributeSet (named
+* "style").
+* <li> The default style specified by <var>defStyleAttr</var> and
+* <var>defStyleRes</var>
+* <li> The base values in this theme.
+* </ol>
+*
+* <p>Each of these inputs is considered in-order, with the first listed
+* taking precedence over the following ones. In other words, if in the
+* AttributeSet you have supplied <code>&lt;Button
+* textColor="#ff000000"&gt;</code>, then the button's text will
+* <em>always</em> be black, regardless of what is specified in any of
+* the styles.
+*
+* @param set The base set of attribute values. May be null.
+* @param attrs The desired attributes to be retrieved.
+* @param defStyleAttr An attribute in the current theme that contains a
+* reference to a style resource that supplies
+* defaults values for the StyledAttributes. Can be
+* 0 to not look for defaults.
+* @param defStyleRes A resource identifier of a style resource that
+* supplies default values for the StyledAttributes,
+* used only if defStyleAttr is 0 or can not be found
+* in the theme. Can be 0 to not look for defaults.
+*
+* @return Returns a TypedArray holding an array of the attribute values.
+* Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+* when done with it.
+*
+* @see Resources#obtainAttributes
+* @see #obtainStyledAttributes(int[])
+* @see #obtainStyledAttributes(int, int[])
+*/
         public TypedArray obtainStyledAttributes(AttributeSet set,
                 int[] attrs, int defStyleAttr, int defStyleRes) {
             int len = attrs.length;
@@ -1128,7 +1165,7 @@ public class Resources {
                 int[] data = array.mData;
                 
                 System.out.println("Attributes:");
-                String s = "  Attrs:";
+                String s = " Attrs:";
                 int i;
                 for (i=0; i<set.getAttributeCount(); i++) {
                     s = s + " " + set.getAttributeName(i);
@@ -1139,7 +1176,7 @@ public class Resources {
                     s = s + "=" + set.getAttributeValue(i);
                 }
                 System.out.println(s);
-                s = "  Found:";
+                s = " Found:";
                 TypedValue value = new TypedValue();
                 for (i=0; i<attrs.length; i++) {
                     int d = i*AssetManager.STYLE_NUM_ENTRIES;
@@ -1157,22 +1194,22 @@ public class Resources {
         }
 
         /**
-         * Retrieve the value of an attribute in the Theme.  The contents of
-         * <var>outValue</var> are ultimately filled in by
-         * {@link Resources#getValue}.
-         * 
-         * @param resid The resource identifier of the desired theme
-         *              attribute.
-         * @param outValue Filled in with the ultimate resource value supplied
-         *                 by the attribute.
-         * @param resolveRefs If true, resource references will be walked; if
-         *                    false, <var>outValue</var> may be a
-         *                    TYPE_REFERENCE.  In either case, it will never
-         *                    be a TYPE_ATTRIBUTE.
-         * 
-         * @return boolean Returns true if the attribute was found and
-         *         <var>outValue</var> is valid, else false.
-         */
+* Retrieve the value of an attribute in the Theme. The contents of
+* <var>outValue</var> are ultimately filled in by
+* {@link Resources#getValue}.
+*
+* @param resid The resource identifier of the desired theme
+* attribute.
+* @param outValue Filled in with the ultimate resource value supplied
+* by the attribute.
+* @param resolveRefs If true, resource references will be walked; if
+* false, <var>outValue</var> may be a
+* TYPE_REFERENCE. In either case, it will never
+* be a TYPE_ATTRIBUTE.
+*
+* @return boolean Returns true if the attribute was found and
+* <var>outValue</var> is valid, else false.
+*/
         public boolean resolveAttribute(int resid, TypedValue outValue,
                 boolean resolveRefs) {
             boolean got = mAssets.getThemeValue(mTheme, resid, outValue, resolveRefs);
@@ -1186,12 +1223,12 @@ public class Resources {
         }
 
         /**
-         * Print contents of this theme out to the log.  For debugging only.
-         * 
-         * @param priority The log priority to use.
-         * @param tag The log tag to use.
-         * @param prefix Text to prefix each line printed.
-         */
+* Print contents of this theme out to the log. For debugging only.
+*
+* @param priority The log priority to use.
+* @param tag The log tag to use.
+* @param prefix Text to prefix each line printed.
+*/
         public void dump(int priority, String tag, String prefix) {
             AssetManager.dumpTheme(mTheme, priority, tag, prefix);
         }
@@ -1211,27 +1248,27 @@ public class Resources {
     }
 
     /**
-     * Generate a new Theme object for this set of Resources.  It initially
-     * starts out empty.
-     * 
-     * @return Theme The newly created Theme container.
-     */
+* Generate a new Theme object for this set of Resources. It initially
+* starts out empty.
+*
+* @return Theme The newly created Theme container.
+*/
     public final Theme newTheme() {
         return new Theme();
     }
 
     /**
-     * Retrieve a set of basic attribute values from an AttributeSet, not
-     * performing styling of them using a theme and/or style resources.
-     * 
-     * @param set The current attribute values to retrieve.
-     * @param attrs The specific attributes to be retrieved.
-     * @return Returns a TypedArray holding an array of the attribute values.
-     * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
-     * when done with it.
-     * 
-     * @see Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
-     */
+* Retrieve a set of basic attribute values from an AttributeSet, not
+* performing styling of them using a theme and/or style resources.
+*
+* @param set The current attribute values to retrieve.
+* @param attrs The specific attributes to be retrieved.
+* @return Returns a TypedArray holding an array of the attribute values.
+* Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+* when done with it.
+*
+* @see Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+*/
     public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
         int len = attrs.length;
         TypedArray array = getCachedStyledAttributes(len);
@@ -1251,8 +1288,8 @@ public class Resources {
     }
 
     /**
-     * Store the newly updated configuration.
-     */
+* Store the newly updated configuration.
+*/
     public void updateConfiguration(Configuration config,
             DisplayMetrics metrics) {
         synchronized (mTmpValue) {
@@ -1340,79 +1377,79 @@ public class Resources {
     }
 
     /**
-     * Update the system resources configuration if they have previously
-     * been initialized.
-     *
-     * @hide
-     */
+* Update the system resources configuration if they have previously
+* been initialized.
+*
+* @hide
+*/
     public static void updateSystemConfiguration(Configuration config, DisplayMetrics metrics) {
         if (mSystem != null) {
             mSystem.updateConfiguration(config, metrics);
             //Log.i(TAG, "Updated system resources " + mSystem
-            //        + ": " + mSystem.getConfiguration());
+            // + ": " + mSystem.getConfiguration());
         }
     }
 
     /**
-     * Return the current display metrics that are in effect for this resource 
-     * object.  The returned object should be treated as read-only.
-     * 
-     * @return The resource's current display metrics. 
-     */
+* Return the current display metrics that are in effect for this resource
+* object. The returned object should be treated as read-only.
+*
+* @return The resource's current display metrics.
+*/
     public DisplayMetrics getDisplayMetrics() {
         return mMetrics;
     }
 
     /**
-     * Return the current configuration that is in effect for this resource 
-     * object.  The returned object should be treated as read-only.
-     * 
-     * @return The resource's current configuration. 
-     */
+* Return the current configuration that is in effect for this resource
+* object. The returned object should be treated as read-only.
+*
+* @return The resource's current configuration.
+*/
     public Configuration getConfiguration() {
         return mConfiguration;
     }
     
     /**
-     * Return the compatibility mode information for the application.
-     * The returned object should be treated as read-only.
-     * 
-     * @return compatibility info. null if the app does not require compatibility mode.
-     * @hide
-     */
+* Return the compatibility mode information for the application.
+* The returned object should be treated as read-only.
+*
+* @return compatibility info. null if the app does not require compatibility mode.
+* @hide
+*/
     public CompatibilityInfo getCompatibilityInfo() {
         return mCompatibilityInfo;
     }
 
     /**
-     * This is just for testing.
-     * @hide
-     */
+* This is just for testing.
+* @hide
+*/
     public void setCompatibilityInfo(CompatibilityInfo ci) {
         mCompatibilityInfo = ci;
         updateConfiguration(mConfiguration, mMetrics);
     }
     
     /**
-     * Return a resource identifier for the given resource name.  A fully
-     * qualified resource name is of the form "package:type/entry".  The first
-     * two components (package and type) are optional if defType and
-     * defPackage, respectively, are specified here.
-     * 
-     * <p>Note: use of this function is discouraged.  It is much more
-     * efficient to retrieve resources by identifier than by name.
-     * 
-     * @param name The name of the desired resource.
-     * @param defType Optional default resource type to find, if "type/" is
-     *                not included in the name.  Can be null to require an
-     *                explicit type.
-     * @param defPackage Optional default package to find, if "package:" is
-     *                   not included in the name.  Can be null to require an
-     *                   explicit package.
-     * 
-     * @return int The associated resource identifier.  Returns 0 if no such
-     *         resource was found.  (0 is not a valid resource ID.)
-     */
+* Return a resource identifier for the given resource name. A fully
+* qualified resource name is of the form "package:type/entry". The first
+* two components (package and type) are optional if defType and
+* defPackage, respectively, are specified here.
+*
+* <p>Note: use of this function is discouraged. It is much more
+* efficient to retrieve resources by identifier than by name.
+*
+* @param name The name of the desired resource.
+* @param defType Optional default resource type to find, if "type/" is
+* not included in the name. Can be null to require an
+* explicit type.
+* @param defPackage Optional default package to find, if "package:" is
+* not included in the name. Can be null to require an
+* explicit package.
+*
+* @return int The associated resource identifier. Returns 0 if no such
+* resource was found. (0 is not a valid resource ID.)
+*/
     public int getIdentifier(String name, String defType, String defPackage) {
         try {
             return Integer.parseInt(name);
@@ -1423,19 +1460,19 @@ public class Resources {
     }
 
     /**
-     * Return the full name for a given resource identifier.  This name is
-     * a single string of the form "package:type/entry".
-     * 
-     * @param resid The resource identifier whose name is to be retrieved.
-     * 
-     * @return A string holding the name of the resource.
-     * 
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @see #getResourcePackageName
-     * @see #getResourceTypeName
-     * @see #getResourceEntryName
-     */
+* Return the full name for a given resource identifier. This name is
+* a single string of the form "package:type/entry".
+*
+* @param resid The resource identifier whose name is to be retrieved.
+*
+* @return A string holding the name of the resource.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getResourcePackageName
+* @see #getResourceTypeName
+* @see #getResourceEntryName
+*/
     public String getResourceName(int resid) throws NotFoundException {
         String str = mAssets.getResourceName(resid);
         if (str != null) return str;
@@ -1444,17 +1481,17 @@ public class Resources {
     }
     
     /**
-     * Return the package name for a given resource identifier.
-     * 
-     * @param resid The resource identifier whose package name is to be
-     * retrieved.
-     * 
-     * @return A string holding the package name of the resource.
-     * 
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @see #getResourceName
-     */
+* Return the package name for a given resource identifier.
+*
+* @param resid The resource identifier whose package name is to be
+* retrieved.
+*
+* @return A string holding the package name of the resource.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getResourceName
+*/
     public String getResourcePackageName(int resid) throws NotFoundException {
         String str = mAssets.getResourcePackageName(resid);
         if (str != null) return str;
@@ -1463,17 +1500,17 @@ public class Resources {
     }
     
     /**
-     * Return the type name for a given resource identifier.
-     * 
-     * @param resid The resource identifier whose type name is to be
-     * retrieved.
-     * 
-     * @return A string holding the type name of the resource.
-     * 
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @see #getResourceName
-     */
+* Return the type name for a given resource identifier.
+*
+* @param resid The resource identifier whose type name is to be
+* retrieved.
+*
+* @return A string holding the type name of the resource.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getResourceName
+*/
     public String getResourceTypeName(int resid) throws NotFoundException {
         String str = mAssets.getResourceTypeName(resid);
         if (str != null) return str;
@@ -1482,17 +1519,17 @@ public class Resources {
     }
     
     /**
-     * Return the entry name for a given resource identifier.
-     * 
-     * @param resid The resource identifier whose entry name is to be
-     * retrieved.
-     * 
-     * @return A string holding the entry name of the resource.
-     * 
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
-     * @see #getResourceName
-     */
+* Return the entry name for a given resource identifier.
+*
+* @param resid The resource identifier whose entry name is to be
+* retrieved.
+*
+* @return A string holding the entry name of the resource.
+*
+* @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+*
+* @see #getResourceName
+*/
     public String getResourceEntryName(int resid) throws NotFoundException {
         String str = mAssets.getResourceEntryName(resid);
         if (str != null) return str;
@@ -1501,16 +1538,16 @@ public class Resources {
     }
     
     /**
-     * Parse a series of {@link android.R.styleable#Extra &lt;extra&gt;} tags from
-     * an XML file.  You call this when you are at the parent tag of the
-     * extra tags, and it return once all of the child tags have been parsed.
-     * This will call {@link #parseBundleExtra} for each extra tag encountered.
-     * 
-     * @param parser The parser from which to retrieve the extras.
-     * @param outBundle A Bundle in which to place all parsed extras.
-     * @throws XmlPullParserException
-     * @throws IOException
-     */
+* Parse a series of {@link android.R.styleable#Extra &lt;extra&gt;} tags from
+* an XML file. You call this when you are at the parent tag of the
+* extra tags, and it return once all of the child tags have been parsed.
+* This will call {@link #parseBundleExtra} for each extra tag encountered.
+*
+* @param parser The parser from which to retrieve the extras.
+* @param outBundle A Bundle in which to place all parsed extras.
+* @throws XmlPullParserException
+* @throws IOException
+*/
     public void parseBundleExtras(XmlResourceParser parser, Bundle outBundle)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
@@ -1529,30 +1566,30 @@ public class Resources {
             } else {
                 XmlUtils.skipCurrentTag(parser);
             }
-        }        
+        }
     }
     
     /**
-     * Parse a name/value pair out of an XML tag holding that data.  The
-     * AttributeSet must be holding the data defined by
-     * {@link android.R.styleable#Extra}.  The following value types are supported:
-     * <ul>
-     * <li> {@link TypedValue#TYPE_STRING}:
-     * {@link Bundle#putCharSequence Bundle.putCharSequence()}
-     * <li> {@link TypedValue#TYPE_INT_BOOLEAN}:
-     * {@link Bundle#putCharSequence Bundle.putBoolean()}
-     * <li> {@link TypedValue#TYPE_FIRST_INT}-{@link TypedValue#TYPE_LAST_INT}:
-     * {@link Bundle#putCharSequence Bundle.putBoolean()}
-     * <li> {@link TypedValue#TYPE_FLOAT}:
-     * {@link Bundle#putCharSequence Bundle.putFloat()}
-     * </ul>
-     * 
-     * @param tagName The name of the tag these attributes come from; this is
-     * only used for reporting error messages.
-     * @param attrs The attributes from which to retrieve the name/value pair.
-     * @param outBundle The Bundle in which to place the parsed value.
-     * @throws XmlPullParserException If the attributes are not valid.
-     */
+* Parse a name/value pair out of an XML tag holding that data. The
+* AttributeSet must be holding the data defined by
+* {@link android.R.styleable#Extra}. The following value types are supported:
+* <ul>
+* <li> {@link TypedValue#TYPE_STRING}:
+* {@link Bundle#putCharSequence Bundle.putCharSequence()}
+* <li> {@link TypedValue#TYPE_INT_BOOLEAN}:
+* {@link Bundle#putCharSequence Bundle.putBoolean()}
+* <li> {@link TypedValue#TYPE_FIRST_INT}-{@link TypedValue#TYPE_LAST_INT}:
+* {@link Bundle#putCharSequence Bundle.putBoolean()}
+* <li> {@link TypedValue#TYPE_FLOAT}:
+* {@link Bundle#putCharSequence Bundle.putFloat()}
+* </ul>
+*
+* @param tagName The name of the tag these attributes come from; this is
+* only used for reporting error messages.
+* @param attrs The attributes from which to retrieve the name/value pair.
+* @param outBundle The Bundle in which to place the parsed value.
+* @throws XmlPullParserException If the attributes are not valid.
+*/
     public void parseBundleExtra(String tagName, AttributeSet attrs,
             Bundle outBundle) throws XmlPullParserException {
         TypedArray sa = obtainAttributes(attrs,
@@ -1597,17 +1634,17 @@ public class Resources {
     }
     
     /**
-     * Retrieve underlying AssetManager storage for these resources.
-     */
+* Retrieve underlying AssetManager storage for these resources.
+*/
     public final AssetManager getAssets() {
         return mAssets;
     }
 
     /**
-     * Call this to remove all cached loaded layout resources from the
-     * Resources object.  Only intended for use with performance testing
-     * tools.
-     */
+* Call this to remove all cached loaded layout resources from the
+* Resources object. Only intended for use with performance testing
+* tools.
+*/
     public final void flushLayoutCache() {
         synchronized (mCachedXmlBlockIds) {
             // First see if this block is in our cache.
@@ -1624,10 +1661,10 @@ public class Resources {
     }
 
     /**
-     * Start preloading of resource data using this Resources object.  Only
-     * for use by the zygote process for loading common system resources.
-     * {@hide}
-     */
+* Start preloading of resource data using this Resources object. Only
+* for use by the zygote process for loading common system resources.
+* {@hide}
+*/
     public final void startPreloading() {
         synchronized (mSync) {
             if (mPreloaded) {
@@ -1639,9 +1676,9 @@ public class Resources {
     }
     
     /**
-     * Called by zygote when it is done preloading resources, to change back
-     * to normal Resources operation.
-     */
+* Called by zygote when it is done preloading resources, to change back
+* to normal Resources operation.
+*/
     public final void finishPreloading() {
         if (mPreloading) {
             mPreloading = false;
@@ -1705,11 +1742,11 @@ public class Resources {
                     try {
                         InputStream is = mAssets.openNonAsset(
                                 value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-        //                System.out.println("Opened file " + file + ": " + is);
+        // System.out.println("Opened file " + file + ": " + is);
                         dr = Drawable.createFromResourceStream(this, value, is,
                                 file, null);
                         is.close();
-        //                System.out.println("Created stream: " + dr);
+        // System.out.println("Created stream: " + dr);
                     } catch (Exception e) {
                         NotFoundException rnf = new NotFoundException(
                             "File " + file + " from drawable resource ID #0x"
@@ -1730,8 +1767,8 @@ public class Resources {
                 } else {
                     synchronized (mTmpValue) {
                         //Log.i(TAG, "Saving cached drawable @ #" +
-                        //        Integer.toHexString(key.intValue())
-                        //        + " in " + this + ": " + cs);
+                        // Integer.toHexString(key.intValue())
+                        // + " in " + this + ": " + cs);
                         mDrawableCache.put(key, new WeakReference<Drawable.ConstantState>(cs));
                     }
                 }
@@ -1744,15 +1781,15 @@ public class Resources {
     private Drawable getCachedDrawable(long key) {
         synchronized (mTmpValue) {
             WeakReference<Drawable.ConstantState> wr = mDrawableCache.get(key);
-            if (wr != null) {   // we have the key
+            if (wr != null) { // we have the key
                 Drawable.ConstantState entry = wr.get();
                 if (entry != null) {
                     //Log.i(TAG, "Returning cached drawable @ #" +
-                    //        Integer.toHexString(((Integer)key).intValue())
-                    //        + " in " + this + ": " + entry);
+                    // Integer.toHexString(((Integer)key).intValue())
+                    // + " in " + this + ": " + entry);
                     return entry.newDrawable(this);
                 }
-                else {  // our entry has been purged
+                else { // our entry has been purged
                     mDrawableCache.delete(key);
                 }
             }
@@ -1810,7 +1847,7 @@ public class Resources {
         if (file.endsWith(".xml")) {
             try {
                 XmlResourceParser rp = loadXmlResourceParser(
-                        file, id, value.assetCookie, "colorstatelist"); 
+                        file, id, value.assetCookie, "colorstatelist");
                 csl = ColorStateList.createFromXml(this, rp);
                 rp.close();
             } catch (Exception e) {
@@ -1832,8 +1869,8 @@ public class Resources {
             } else {
                 synchronized (mTmpValue) {
                     //Log.i(TAG, "Saving cached color state list @ #" +
-                    //        Integer.toHexString(key.intValue())
-                    //        + " in " + this + ": " + csl);
+                    // Integer.toHexString(key.intValue())
+                    // + " in " + this + ": " + csl);
                     mColorStateListCache.put(
                         key, new WeakReference<ColorStateList>(csl));
                 }
@@ -1846,15 +1883,15 @@ public class Resources {
     private ColorStateList getCachedColorStateList(int key) {
         synchronized (mTmpValue) {
             WeakReference<ColorStateList> wr = mColorStateListCache.get(key);
-            if (wr != null) {   // we have the key
+            if (wr != null) { // we have the key
                 ColorStateList entry = wr.get();
                 if (entry != null) {
                     //Log.i(TAG, "Returning cached color state list @ #" +
-                    //        Integer.toHexString(((Integer)key).intValue())
-                    //        + " in " + this + ": " + entry);
+                    // Integer.toHexString(((Integer)key).intValue())
+                    // + " in " + this + ": " + entry);
                     return entry;
                 }
-                else {  // our entry has been purged
+                else { // our entry has been purged
                     mColorStateListCache.delete(key);
                 }
             }
@@ -1887,8 +1924,8 @@ public class Resources {
                     final int num = mCachedXmlBlockIds.length;
                     for (int i=0; i<num; i++) {
                         if (mCachedXmlBlockIds[i] == id) {
-                            //System.out.println("**** REUSING XML BLOCK!  id="
-                            //                   + id + ", index=" + i);
+                            //System.out.println("**** REUSING XML BLOCK! id="
+                            // + id + ", index=" + i);
                             return mCachedXmlBlocks[i].newParser();
                         }
                     }
@@ -1907,8 +1944,8 @@ public class Resources {
                         }
                         mCachedXmlBlockIds[pos] = id;
                         mCachedXmlBlocks[pos] = block;
-                        //System.out.println("**** CACHING NEW XML BLOCK!  id="
-                        //                   + id + ", index=" + pos);
+                        //System.out.println("**** CACHING NEW XML BLOCK! id="
+                        // + id + ", index=" + pos);
                         return block.newParser();
                     }
                 }
@@ -1927,9 +1964,9 @@ public class Resources {
     }
 
     /**
-     * Returns the display adjusted for the Resources' metrics.
-     * @hide
-     */
+* Returns the display adjusted for the Resources' metrics.
+* @hide
+*/
     public Display getDefaultDisplay(Display defaultDisplay) {
         if (mDefaultDisplay == null) {
             if (!mCompatibilityInfo.isScalingRequired() && mCompatibilityInfo.supportsScreen()) {

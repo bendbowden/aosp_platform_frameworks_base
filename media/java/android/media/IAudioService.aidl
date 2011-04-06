@@ -86,4 +86,7 @@ interface IAudioService {
     void startBluetoothSco(IBinder cb);
 
     void stopBluetoothSco(IBinder cb);
+
+    void broadcastMediaPlaybackState(int state);
 }
+

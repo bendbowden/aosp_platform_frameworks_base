@@ -5,7 +5,7 @@
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0
+** http://www.apache.org/licenses/LICENSE-2.0
 **
 ** Unless required by applicable law or agreed to in writing, software
 ** distributed under the License is distributed on an "AS IS" BASIS,
@@ -239,7 +239,7 @@ status_t FLACPlayer::start()
     mRender = true;
 
     // wake up render thread
-    LOGV("  wakeup render thread\n");
+    LOGV(" wakeup render thread\n");
     mCondition.signal();
     return NO_ERROR;
 }
@@ -464,6 +464,9 @@ int FLACPlayer::render() {
                 if (mAudioSink->ready()) mAudioSink->pause();
                 mRender = false;
                 audioStarted = false;
+
+                LOGV("send MEDIA_PLAYBACK_PAUSED\n");
+                sendEvent(MEDIA_PLAYBACK_PAUSED);
             }
 
             // nothing to render, wait for client thread to wake us up
@@ -492,6 +495,9 @@ int FLACPlayer::render() {
                 LOGV("render - starting audio\n");
                 mAudioSink->start();
                 audioStarted = true;
+
+                LOGV("send MEDIA_PLAYBACK_STARTED\n");
+                sendEvent(MEDIA_PLAYBACK_STARTED);
             }
 
             if (FLAC__stream_decoder_get_state(mDecoder) != FLAC__STREAM_DECODER_END_OF_STREAM) {

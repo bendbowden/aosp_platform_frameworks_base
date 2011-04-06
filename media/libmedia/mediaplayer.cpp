@@ -6,7 +6,7 @@
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0
+** http://www.apache.org/licenses/LICENSE-2.0
 **
 ** Unless required by applicable law or agreed to in writing, software
 ** distributed under the License is distributed on an "AS IS" BASIS,
@@ -164,7 +164,7 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
             ((mCurrentState & MEDIA_PLAYER_IDLE) != MEDIA_PLAYER_IDLE);
     if ((mPlayer != NULL) && hasBeenInitialized) {
          LOGV("invoke %d", request.dataSize());
-         return  mPlayer->invoke(request, reply);
+         return mPlayer->invoke(request, reply);
     }
     LOGE("invoke failed: wrong state %X", mCurrentState);
     return INVALID_OPERATION;
@@ -206,9 +206,9 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
     if (surface != NULL)
-        return  mPlayer->setVideoSurface(surface->getISurface());
+        return mPlayer->setVideoSurface(surface->getISurface());
     else
-        return  mPlayer->setVideoSurface(NULL);
+        return mPlayer->setVideoSurface(NULL);
 }
 
 // must call with lock held
@@ -244,7 +244,7 @@ status_t MediaPlayer::prepare()
     }
 
     if (mPrepareSync) {
-        mSignal.wait(mLock);  // wait for prepare done
+        mSignal.wait(mLock); // wait for prepare done
         mPrepareSync = false;
     }
     LOGV("prepare complete - status=%d", mPrepareStatus);
@@ -397,7 +397,7 @@ status_t MediaPlayer::getDuration(int *msec)
 status_t MediaPlayer::seekTo_l(int msec)
 {
     LOGV("seekTo %d", msec);
-    if ((mPlayer != 0) && ( mCurrentState & ( MEDIA_PLAYER_STARTED | MEDIA_PLAYER_PREPARED | MEDIA_PLAYER_PAUSED |  MEDIA_PLAYER_PLAYBACK_COMPLETE) ) ) {
+    if ((mPlayer != 0) && ( mCurrentState & ( MEDIA_PLAYER_STARTED | MEDIA_PLAYER_PREPARED | MEDIA_PLAYER_PAUSED | MEDIA_PLAYER_PLAYBACK_COMPLETE) ) ) {
         if ( msec < 0 ) {
             LOGW("Attempt to seek to invalid position: %d", msec);
             msec = 0;
@@ -522,7 +522,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
 
     if (mPlayer == 0) {
         LOGV("notify(%d, %d, %d) callback on disconnected mediaplayer", msg, ext1, ext2);
-        if (locked) mLock.unlock();   // release the lock when done.
+        if (locked) mLock.unlock(); // release the lock when done.
         return;
     }
 
@@ -538,6 +538,12 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
             mPrepareStatus = NO_ERROR;
             mSignal.signal();
         }
+        break;
+    case MEDIA_PLAYBACK_STARTED:
+        LOGV("playback started");
+        break;
+    case MEDIA_PLAYBACK_PAUSED:
+        LOGV("playback paused");
         break;
     case MEDIA_PLAYBACK_COMPLETE:
         LOGV("playback complete");

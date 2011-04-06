@@ -5,7 +5,7 @@
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0
+** http://www.apache.org/licenses/LICENSE-2.0
 **
 ** Unless required by applicable law or agreed to in writing, software
 ** distributed under the License is distributed on an "AS IS" BASIS,
@@ -169,10 +169,10 @@ status_t VorbisPlayer::setdatasource(const char *path, int fd, int64_t offset, i
     }
 
     ov_callbacks callbacks = {
-        (size_t (*)(void *, size_t, size_t, void *))  vp_fread,
-        (int (*)(void *, ogg_int64_t, int))           vp_fseek,
-        (int (*)(void *))                             vp_fclose,
-        (long (*)(void *))                            vp_ftell
+        (size_t (*)(void *, size_t, size_t, void *)) vp_fread,
+        (int (*)(void *, ogg_int64_t, int)) vp_fseek,
+        (int (*)(void *)) vp_fclose,
+        (long (*)(void *)) vp_ftell
     };
 
     mOffset = offset;
@@ -186,7 +186,7 @@ status_t VorbisPlayer::setdatasource(const char *path, int fd, int64_t offset, i
         return ERROR_OPEN_FAILED;
     }
 
-    // look for the android loop tag  (for ringtones)
+    // look for the android loop tag (for ringtones)
     char **ptr = ov_comment(&mVorbisFile,-1)->user_comments;
     while(*ptr) {
         // does the comment start with ANDROID_LOOP_TAG
@@ -196,7 +196,7 @@ status_t VorbisPlayer::setdatasource(const char *path, int fd, int64_t offset, i
             mAndroidLoop = (strncmp(val, "true", 4) == 0);
         }
         // we keep parsing even after finding one occurence of ANDROID_LOOP_TAG,
-        // as we could find another one  (the tag might have been appended more than once).
+        // as we could find another one (the tag might have been appended more than once).
         ++ptr;
     }
     LOGV_IF(mAndroidLoop, "looped sound");
@@ -238,7 +238,7 @@ status_t VorbisPlayer::start()
     mRender = true;
 
     // wake up render thread
-    LOGV("  wakeup render thread\n");
+    LOGV(" wakeup render thread\n");
     mCondition.signal();
     return NO_ERROR;
 }
@@ -430,6 +430,9 @@ int VorbisPlayer::render() {
                 if (mAudioSink->ready()) mAudioSink->pause();
                 mRender = false;
                 audioStarted = false;
+
+                LOGV("send MEDIA_PLAYBACK_PAUSED");
+                sendEvent(MEDIA_PLAYBACK_PAUSED);
             }
 
             // nothing to render, wait for client thread to wake us up
@@ -509,6 +512,9 @@ int VorbisPlayer::render() {
             LOGV("render - starting audio\n");
             mAudioSink->start();
             audioStarted = true;
+
+            LOGV("send MEDIA_PLAYBACK_STARTED");
+            sendEvent(MEDIA_PLAYBACK_STARTED);
         }
     }
 

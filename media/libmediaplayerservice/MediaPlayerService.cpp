@@ -6,7 +6,7 @@
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0
+** http://www.apache.org/licenses/LICENSE-2.0
 **
 ** Unless required by applicable law or agreed to in writing, software
 ** distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
-#include <utils/Errors.h>  // for status_t
+#include <utils/Errors.h> // for status_t
 #include <utils/String8.h>
 #include <utils/SystemClock.h>
 #include <utils/Vector.h>
@@ -85,7 +85,7 @@ using android::NOT_ENOUGH_DATA;
 using android::Parcel;
 
 // Max number of entries in the filter.
-const int kMaxFilterSize = 64;  // I pulled that out of thin air.
+const int kMaxFilterSize = 64; // I pulled that out of thin air.
 
 // FIXME: Move all the metadata related function in the Metadata.cpp
 
@@ -93,22 +93,22 @@ const int kMaxFilterSize = 64;  // I pulled that out of thin air.
 // Unmarshall a filter from a Parcel.
 // Filter format in a parcel:
 //
-//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+// 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// |                       number of entries (n)                   |
+// | number of entries (n) |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// |                       metadata type 1                         |
+// | metadata type 1 |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// |                       metadata type 2                         |
+// | metadata type 2 |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//  ....
+// ....
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// |                       metadata type n                         |
+// | metadata type n |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 // @param p Parcel that should start with a filter.
 // @param[out] filter On exit contains the list of metadata type to be
-//                    filtered.
+// filtered.
 // @param[out] status On exit contains the status code to be returned.
 // @return true if the parcel starts with a valid filter.
 bool unmarshallFilter(const Parcel& p,
@@ -179,7 +179,7 @@ bool findMetadata(const Metadata::Filter& filter, const int32_t val)
     return filter.indexOf(val) >= 0;
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
 
 namespace android {
@@ -189,7 +189,7 @@ typedef struct {
     const char *extension;
     const player_type playertype;
 } extmap;
-extmap FILE_EXTS [] =  {
+extmap FILE_EXTS [] = {
         {".mid", SONIVOX_PLAYER},
         {".midi", SONIVOX_PLAYER},
         {".smf", SONIVOX_PLAYER},
@@ -200,12 +200,12 @@ extmap FILE_EXTS [] =  {
         {".ota", SONIVOX_PLAYER},
         {".ogg", VORBIS_PLAYER},
         {".oga", VORBIS_PLAYER},
+        {".flac", FLAC_PLAYER},
 #ifndef NO_OPENCORE
         {".wma", PV_PLAYER},
         {".wmv", PV_PLAYER},
         {".asf", PV_PLAYER},
 #endif
-        {".flac", FLAC_PLAYER},
 };
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
@@ -310,14 +310,14 @@ status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& ar
 
     result.append(" AudioCache\n");
     if (mHeap != 0) {
-        snprintf(buffer, 255, "  heap base(%p), size(%d), flags(%d), device(%s)\n",
+        snprintf(buffer, 255, " heap base(%p), size(%d), flags(%d), device(%s)\n",
                 mHeap->getBase(), mHeap->getSize(), mHeap->getFlags(), mHeap->getDevice());
         result.append(buffer);
     }
-    snprintf(buffer, 255, "  msec per frame(%f), channel count(%d), format(%d), frame count(%ld)\n",
+    snprintf(buffer, 255, " msec per frame(%f), channel count(%d), format(%d), frame count(%ld)\n",
             mMsecsPerFrame, mChannelCount, mFormat, mFrameCount);
     result.append(buffer);
-    snprintf(buffer, 255, "  sample rate(%d), size(%d), error(%d), command complete(%s)\n",
+    snprintf(buffer, 255, " sample rate(%d), size(%d), error(%d), command complete(%s)\n",
             mSampleRate, mSize, mError, mCommandComplete?"true":"false");
     result.append(buffer);
     ::write(fd, result.string(), result.size());
@@ -331,10 +331,10 @@ status_t MediaPlayerService::AudioOutput::dump(int fd, const Vector<String16>& a
     String8 result;
 
     result.append(" AudioOutput\n");
-    snprintf(buffer, 255, "  stream type(%d), left - right volume(%f, %f)\n",
+    snprintf(buffer, 255, " stream type(%d), left - right volume(%f, %f)\n",
             mStreamType, mLeftVolume, mRightVolume);
     result.append(buffer);
-    snprintf(buffer, 255, "  msec per frame(%f), latency (%d)\n",
+    snprintf(buffer, 255, " msec per frame(%f), latency (%d)\n",
             mMsecsPerFrame, mLatency);
     result.append(buffer);
     ::write(fd, result.string(), result.size());
@@ -350,7 +350,7 @@ status_t MediaPlayerService::Client::dump(int fd, const Vector<String16>& args) 
     char buffer[SIZE];
     String8 result;
     result.append(" Client\n");
-    snprintf(buffer, 255, "  pid(%d), connId(%d), status(%d), looping(%s)\n",
+    snprintf(buffer, 255, " pid(%d), connId(%d), status(%d), looping(%s)\n",
             mPid, mConnId, mStatus, mLoop?"true": "false");
     result.append(buffer);
     write(fd, result.string(), result.size());
@@ -451,7 +451,7 @@ void memStatus(int fd, const Vector<String16>& args)
             ptr += sizeof(intptr_t) * backtraceSize;
         }
 
-        // Now we need to sort the entries.  They come sorted by size but
+        // Now we need to sort the entries. They come sorted by size but
         // not by stack trace which causes problems using diff.
         bool moved;
         do {
@@ -522,7 +522,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
         for (int i = 0, n = mMediaRecorderClients.size(); i < n; ++i) {
             result.append(" MediaRecorderClient\n");
             sp<MediaRecorderClient> c = mMediaRecorderClients[i].promote();
-            snprintf(buffer, 255, "  pid(%d)\n\n", c->mPid);
+            snprintf(buffer, 255, " pid(%d)\n\n", c->mPid);
             result.append(buffer);
         }
 
@@ -535,7 +535,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
                 if (strstr(buffer, " /sdcard/") ||
                     strstr(buffer, " /system/sounds/") ||
                     strstr(buffer, " /system/media/")) {
-                    result.append("  ");
+                    result.append(" ");
                     result.append(buffer);
                 }
             }
@@ -570,7 +570,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
                                 if (strstr(linkto, "/sdcard/") == linkto ||
                                     strstr(linkto, "/system/sounds/") == linkto ||
                                     strstr(linkto, "/system/media/") == linkto) {
-                                    result.append("  ");
+                                    result.append(" ");
                                     result.append(buffer);
                                     result.append(" -> ");
                                     result.append(linkto);
@@ -578,7 +578,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
                                 }
                             }
                         } else {
-                            result.append("  unexpected type for ");
+                            result.append(" unexpected type for ");
                             result.append(buffer);
                             result.append("\n");
                         }
@@ -732,7 +732,7 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
         locator.fd = fd;
         locator.offset = offset;
         locator.length = length;
-        EAS_HANDLE  eashandle;
+        EAS_HANDLE eashandle;
         if (EAS_OpenFile(easdata, &locator, &eashandle) == EAS_SUCCESS) {
             EAS_CloseFile(easdata, eashandle);
             EAS_Shutdown(easdata);
@@ -889,7 +889,7 @@ status_t MediaPlayerService::Client::setDataSource(
         if (mStatus == NO_ERROR) {
             mPlayer = p;
         } else {
-            LOGE("  error: %d", mStatus);
+            LOGE(" error: %d", mStatus);
         }
         return mStatus;
     }
@@ -905,10 +905,10 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
         return UNKNOWN_ERROR;
     }
 
-    LOGV("st_dev  = %llu", sb.st_dev);
+    LOGV("st_dev = %llu", sb.st_dev);
     LOGV("st_mode = %u", sb.st_mode);
-    LOGV("st_uid  = %lu", sb.st_uid);
-    LOGV("st_gid  = %lu", sb.st_gid);
+    LOGV("st_uid = %lu", sb.st_uid);
+    LOGV("st_gid = %lu", sb.st_gid);
     LOGV("st_size = %llu", sb.st_size);
 
     if (offset >= sb.st_size) {
@@ -1326,9 +1326,9 @@ Exit:
 }
 
 /*
- * Avert your eyes, ugly hack ahead.
- * The following is to support music visualizations.
- */
+* Avert your eyes, ugly hack ahead.
+* The following is to support music visualizations.
+*/
 
 static const int NUMVIZBUF = 32;
 static const int VIZBUFFRAMES = 1024;
@@ -1336,7 +1336,7 @@ static const int BUFTIMEMSEC = NUMVIZBUF * VIZBUFFRAMES * 1000 / 44100;
 static const int TOTALBUFTIMEMSEC = NUMVIZBUF * BUFTIMEMSEC;
 
 static bool gotMem = false;
-static sp<MemoryHeapBase> heap; 
+static sp<MemoryHeapBase> heap;
 static sp<MemoryBase> mem[NUMVIZBUF];
 static uint64_t endTime;
 static uint64_t lastReadTime;
@@ -1356,12 +1356,12 @@ static void allocVizBufs() {
 
 
 /*
- * Get a buffer of audio data that is about to be played.
- * We don't synchronize this because in practice the writer
- * is ahead of the reader, and even if we did happen to catch
- * a buffer while it's being written, it's just a visualization,
- * so no harm done.
- */
+* Get a buffer of audio data that is about to be played.
+* We don't synchronize this because in practice the writer
+* is ahead of the reader, and even if we did happen to catch
+* a buffer while it's being written, it's just a visualization,
+* so no harm done.
+*/
 static sp<MemoryBase> getVizBuffer() {
 
     allocVizBufs();
@@ -1370,7 +1370,7 @@ static sp<MemoryBase> getVizBuffer() {
 
     // if there is no recent buffer (yet), just return empty handed
     if (lastWriteTime + TOTALBUFTIMEMSEC < lastReadTime) {
-        //LOGI("@@@@    no audio data to look at yet: %d + %d < %d", (int)lastWriteTime, TOTALBUFTIMEMSEC, (int)lastReadTime);
+        //LOGI("@@@@ no audio data to look at yet: %d + %d < %d", (int)lastWriteTime, TOTALBUFTIMEMSEC, (int)lastReadTime);
         return NULL;
     }
 
@@ -1443,7 +1443,7 @@ void MediaPlayerService::AudioOutput::setMinBufferCount()
     char value[PROPERTY_VALUE_MAX];
     if (property_get("ro.kernel.qemu", value, 0)) {
         mIsOnEmulator = true;
-        mMinBufferCount = 12;  // to prevent systematic buffer underrun for emulator
+        mMinBufferCount = 12; // to prevent systematic buffer underrun for emulator
     }
 }
 
@@ -1837,6 +1837,12 @@ void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int
         break;
     case MEDIA_PREPARED:
         LOGV("prepared");
+        break;
+    case MEDIA_PLAYBACK_STARTED:
+        LOGV("playback started");
+        break;
+    case MEDIA_PLAYBACK_PAUSED:
+        LOGV("playback paused");
         break;
     case MEDIA_PLAYBACK_COMPLETE:
         LOGV("playback complete");

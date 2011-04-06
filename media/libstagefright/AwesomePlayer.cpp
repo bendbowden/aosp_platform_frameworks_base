@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2009 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "AwesomePlayer"
@@ -568,6 +568,8 @@ status_t AwesomePlayer::play_l() {
         seekTo_l(0);
     }
 
+    notifyListener_l(MEDIA_PLAYBACK_STARTED);
+
     return OK;
 }
 
@@ -603,7 +605,7 @@ void AwesomePlayer::initRenderer_l() {
             // Other decoders are instantiated locally and as a consequence
             // allocate their buffers in local address space.
             mVideoRenderer = new AwesomeLocalRenderer(
-                false,  // previewOnly
+                false, // previewOnly
                 component,
                 (OMX_COLOR_FORMATTYPE)format,
                 mISurface,
@@ -630,6 +632,8 @@ status_t AwesomePlayer::pause_l() {
     }
 
     mFlags &= ~PLAYING;
+
+    notifyListener_l(MEDIA_PLAYBACK_PAUSED);
 
     return OK;
 }
@@ -1076,7 +1080,7 @@ status_t AwesomePlayer::prepareAsync() {
     Mutex::Autolock autoLock(mLock);
 
     if (mFlags & PREPARING) {
-        return UNKNOWN_ERROR;  // async prepare already pending
+        return UNKNOWN_ERROR; // async prepare already pending
     }
 
     mIsAsyncPrepare = true;
@@ -1085,7 +1089,7 @@ status_t AwesomePlayer::prepareAsync() {
 
 status_t AwesomePlayer::prepareAsync_l() {
     if (mFlags & PREPARING) {
-        return UNKNOWN_ERROR;  // async prepare already pending
+        return UNKNOWN_ERROR; // async prepare already pending
     }
 
     if (!mQueueStarted) {
@@ -1361,7 +1365,7 @@ status_t AwesomePlayer::resume() {
     if (state->mLastVideoFrame && mISurface != NULL) {
         mVideoRenderer =
             new AwesomeLocalRenderer(
-                    true,  // previewOnly
+                    true, // previewOnly
                     "",
                     (OMX_COLOR_FORMATTYPE)state->mColorFormat,
                     mISurface,
@@ -1390,5 +1394,4 @@ uint32_t AwesomePlayer::flags() const {
     return mExtractorFlags;
 }
 
-}  // namespace android
-
+} // namespace android

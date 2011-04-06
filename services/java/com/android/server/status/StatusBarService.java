@@ -1,18 +1,19 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+*
+* Copyright (C) 2007 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.server.status;
 
@@ -67,22 +68,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.provider.Settings;
+import com.android.server.status.galaxyswidget.GalaxySWidget;
 
 /**
- * The public (ok, semi-public) service for the status bar.
- * <p>
- * This interesting thing to note about this class is that most of the methods that
- * are called from other classes just post a message, and everything else is batched
- * and coalesced into a series of calls to methods that all start with "perform."
- * There are two reasons for this.  The first is that some of the methods (activate/deactivate)
- * are on IStatusBar, so they're called from the thread pool and they need to make their
- * way onto the UI thread.  The second is that the message queue is stopped while animations
- * are happening in order to make for smoother transitions.
- * <p>
- * Each icon is either an icon or an icon and a notification.  They're treated mostly
- * separately throughout the code, although they both use the same key, which is assigned
- * when they are created.
- */
+* The public (ok, semi-public) service for the status bar.
+* <p>
+* This interesting thing to note about this class is that most of the methods that
+* are called from other classes just post a message, and everything else is batched
+* and coalesced into a series of calls to methods that all start with "perform."
+* There are two reasons for this. The first is that some of the methods (activate/deactivate)
+* are on IStatusBar, so they're called from the thread pool and they need to make their
+* way onto the UI thread. The second is that the message queue is stopped while animations
+* are happening in order to make for smoother transitions.
+* <p>
+* Each icon is either an icon or an icon and a notification. They're treated mostly
+* separately throughout the code, although they both use the same key, which is assigned
+* when they are created.
+*/
 public class StatusBarService extends IStatusBar.Stub
 {
     static final String TAG = "StatusBar";
@@ -158,7 +163,7 @@ public class StatusBarService extends IStatusBar.Stub
     NotificationCallbacks mNotificationCallbacks;
     
     // All accesses to mIconMap and mNotificationData are syncronized on those objects,
-    // but this is only so dump() can work correctly.  Modifying these outside of the UI
+    // but this is only so dump() can work correctly. Modifying these outside of the UI
     // thread will not work, there are places in the code that unlock and reaquire between
     // reads and require them to not be modified.
 
@@ -202,6 +207,9 @@ public class StatusBarService extends IStatusBar.Stub
     WindowManager.LayoutParams mTrackingParams;
     int mTrackingPosition; // the position of the top of the tracking view.
 
+    // galaxy s widget
+    GalaxySWidget mGalaxySWidget;
+
     // ticker
     private Ticker mTicker;
     private View mTickerView;
@@ -230,8 +238,8 @@ public class StatusBarService extends IStatusBar.Stub
     int mDisabled = 0;
 
     /**
-     * Construct the service, add the status bar view to the window manager
-     */
+* Construct the service, add the status bar view to the window manager
+*/
     public StatusBarService(Context context) {
         mContext = context;
         mDisplay = ((WindowManager)context.getSystemService(
@@ -291,6 +299,9 @@ public class StatusBarService extends IStatusBar.Stub
 
         mOngoingTitle.setVisibility(View.GONE);
         mLatestTitle.setVisibility(View.GONE);
+
+        mGalaxySWidget = (GalaxySWidget)expanded.findViewById(R.id.galaxy_s_widget);
+        mGalaxySWidget.setupSettingsObserver(mHandler);
         
         mTicker = new MyTicker(context, sb);
 
@@ -347,6 +358,8 @@ public class StatusBarService extends IStatusBar.Stub
         lp.windowAnimations = R.style.Animation_StatusBar;
 
         WindowManagerImpl.getDefault().addView(view, lp);
+
+        mGalaxySWidget.setupWidget();
     }
     
     // ================================================================================
@@ -371,7 +384,7 @@ public class StatusBarService extends IStatusBar.Stub
         enforceStatusBar();
         synchronized (mNotificationCallbacks) {
             // This is a little gross, but I think it's safe as long as nobody else
-            // synchronizes on mNotificationCallbacks.  It's important that the the callback
+            // synchronizes on mNotificationCallbacks. It's important that the the callback
             // and the pending op get done in the correct order and not interleaved with
             // other calls, otherwise they'll get out of sync.
             int net;
@@ -546,8 +559,8 @@ public class StatusBarService extends IStatusBar.Stub
     // Always called from UI thread
     // ================================================================================
     /**
-     * All changes to the status bar and notifications funnel through here and are batched.
-     */
+* All changes to the status bar and notifications funnel through here and are batched.
+*/
     private class H extends Handler {
         public void handleMessage(Message m) {
             if (m.what == MSG_ANIMATE) {
@@ -690,15 +703,15 @@ public class StatusBarService extends IStatusBar.Stub
                 updateNotificationView(notification, oldData);
             }
             // Show the ticker if one is requested, and the text is different
-            // than the currently displayed ticker.  Also don't do this
+            // than the currently displayed ticker. Also don't do this
             // until status bar window is attached to the window manager,
-            // because...  well, what's the point otherwise?  And trying to
+            // because... well, what's the point otherwise? And trying to
             // run a ticker without being attached will crash!
             if (n.tickerText != null && mStatusBarView.getWindowToken() != null
                     && (oldData == null
                         || oldData.tickerText == null
                         || !CharSequences.equals(oldData.tickerText, n.tickerText))) {
-                if (0 == (mDisabled & 
+                if (0 == (mDisabled &
                     (StatusBarManager.DISABLE_NOTIFICATION_ICONS | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                     mTicker.addEntry(n, StatusBarIcon.getIcon(mContext, data), n.tickerText);
                 }
@@ -888,9 +901,9 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     /**
-     * Remove the old one and put the new one in its place.
-     * @param notification the notification
-     */
+* Remove the old one and put the new one in its place.
+* @param notification the notification
+*/
     void updateNotificationView(StatusBarNotification notification, NotificationData oldData) {
         NotificationData n = notification.data;
         if (oldData != null && n != null
@@ -915,7 +928,7 @@ public class StatusBarService extends IStatusBar.Stub
                 }
             }
             catch (RuntimeException e) {
-                // It failed to add cleanly.  Log, and remove the view from the panel.
+                // It failed to add cleanly. Log, and remove the view from the panel.
                 Slog.w(TAG, "couldn't reapply views for package " + n.contentView.getPackage(), e);
                 removeNotificationView(notification);
             }
@@ -1071,7 +1084,7 @@ public class StatusBarService extends IStatusBar.Stub
             if (SPEW) Slog.d(TAG, "doAnimation");
             if (SPEW) Slog.d(TAG, "doAnimation before mAnimY=" + mAnimY);
             incrementAnim();
-            if (SPEW) Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
+            if (SPEW) Slog.d(TAG, "doAnimation after mAnimY=" + mAnimY);
             if (mAnimY >= mDisplay.getHeight()-1) {
                 if (SPEW) Slog.d(TAG, "Animation completed to expanded state.");
                 mAnimating = false;
@@ -1100,15 +1113,15 @@ public class StatusBarService extends IStatusBar.Stub
 
     void incrementAnim() {
         long now = SystemClock.uptimeMillis();
-        float t = ((float)(now - mAnimLastTime)) / 1000;            // ms -> s
+        float t = ((float)(now - mAnimLastTime)) / 1000; // ms -> s
         final float y = mAnimY;
-        final float v = mAnimVel;                                   // px/s
-        final float a = mAnimAccel;                                 // px/s/s
-        mAnimY = y + (v*t) + (0.5f*a*t*t);                          // px
-        mAnimVel = v + (a*t);                                       // px/s
-        mAnimLastTime = now;                                        // ms
+        final float v = mAnimVel; // px/s
+        final float a = mAnimAccel; // px/s/s
+        mAnimY = y + (v*t) + (0.5f*a*t*t); // px
+        mAnimVel = v + (a*t); // px/s
+        mAnimLastTime = now; // ms
         //Slog.d(TAG, "y=" + y + " v=" + v + " a=" + a + " t=" + t + " mAnimY=" + mAnimY
-        //        + " mAnimAccel=" + mAnimAccel);
+        // + " mAnimAccel=" + mAnimAccel);
     }
 
     void doRevealAnimation() {
@@ -1170,7 +1183,7 @@ public class StatusBarService extends IStatusBar.Stub
                     vel > 200.0f
                     || (y > (mDisplayHeight-25) && vel > -200.0f))) {
                 // We are expanded, but they didn't move sufficiently to cause
-                // us to retract.  Animate back to the expanded position.
+                // us to retract. Animate back to the expanded position.
                 mAnimAccel = 2000.0f;
                 if (vel < 0) {
                     mAnimVel = 0;
@@ -1188,7 +1201,7 @@ public class StatusBarService extends IStatusBar.Stub
                     vel > 200.0f
                     || (y > (mDisplayHeight/2) && vel > -200.0f))) {
                 // We are collapsed, and they moved enough to allow us to
-                // expand.  Animate in the notifications.
+                // expand. Animate in the notifications.
                 mAnimAccel = 2000.0f;
                 if (vel < 0) {
                     mAnimVel = 0;
@@ -1196,7 +1209,7 @@ public class StatusBarService extends IStatusBar.Stub
             }
             else {
                 // We are collapsed, but they didn't move sufficiently to cause
-                // us to retract.  Animate back to the collapsed position.
+                // us to retract. Animate back to the collapsed position.
                 mAnimAccel = -2000.0f;
                 if (vel > 0) {
                     mAnimVel = 0;
@@ -1204,7 +1217,7 @@ public class StatusBarService extends IStatusBar.Stub
             }
         }
         //Slog.d(TAG, "mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel
-        //        + " mAnimAccel=" + mAnimAccel);
+        // + " mAnimAccel=" + mAnimAccel);
 
         long now = SystemClock.uptimeMillis();
         mAnimLastTime = now;
@@ -1257,7 +1270,7 @@ public class StatusBarService extends IStatusBar.Stub
                 int y = (int)event.getRawY();
                 if (mAnimatingReveal && y < minY) {
                     // nothing
-                } else  {
+                } else {
                     mAnimatingReveal = false;
                     updateExpandedViewPos(y + mViewDelta);
                 }
@@ -1304,7 +1317,7 @@ public class StatusBarService extends IStatusBar.Stub
             try {
                 // The intent we are sending is for the application, which
                 // won't have permission to immediately start an activity after
-                // the user switches to home.  We know it is safe to do at this
+                // the user switches to home. We know it is safe to do at this
                 // point, so make sure new activity switches are now allowed.
                 ActivityManagerNative.getDefault().resumeAppSwitches();
             } catch (RemoteException e) {
@@ -1318,7 +1331,7 @@ public class StatusBarService extends IStatusBar.Stub
                 mIntent.send(mContext, 0, overlay);
                 mNotificationCallbacks.onNotificationClick(mPkg, mTag, mId);
             } catch (PendingIntent.CanceledException e) {
-                // the stack trace isn't very helpful here.  Just log the exception message.
+                // the stack trace isn't very helpful here. Just log the exception message.
                 Slog.w(TAG, "Sending contentIntent failed: " + e);
             }
             deactivate();
@@ -1400,79 +1413,79 @@ public class StatusBarService extends IStatusBar.Stub
         
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
-            pw.println("  mExpanded=" + mExpanded
+            pw.println(" mExpanded=" + mExpanded
                     + ", mExpandedVisible=" + mExpandedVisible);
-            pw.println("  mTicking=" + mTicking);
-            pw.println("  mTracking=" + mTracking);
-            pw.println("  mAnimating=" + mAnimating
+            pw.println(" mTicking=" + mTicking);
+            pw.println(" mTracking=" + mTracking);
+            pw.println(" mAnimating=" + mAnimating
                     + ", mAnimY=" + mAnimY + ", mAnimVel=" + mAnimVel
                     + ", mAnimAccel=" + mAnimAccel);
-            pw.println("  mCurAnimationTime=" + mCurAnimationTime
+            pw.println(" mCurAnimationTime=" + mCurAnimationTime
                     + " mAnimLastTime=" + mAnimLastTime);
-            pw.println("  mDisplayHeight=" + mDisplayHeight
+            pw.println(" mDisplayHeight=" + mDisplayHeight
                     + " mAnimatingReveal=" + mAnimatingReveal
                     + " mViewDelta=" + mViewDelta);
-            pw.println("  mDisplayHeight=" + mDisplayHeight);
+            pw.println(" mDisplayHeight=" + mDisplayHeight);
             final int N = mQueue.size();
-            pw.println("  mQueue.size=" + N);
+            pw.println(" mQueue.size=" + N);
             for (int i=0; i<N; i++) {
                 PendingOp op = mQueue.get(i);
-                pw.println("    [" + i + "] key=" + op.key + " code=" + op.code + " visible="
+                pw.println(" [" + i + "] key=" + op.key + " code=" + op.code + " visible="
                         + op.visible);
-                pw.println("           iconData=" + op.iconData);
-                pw.println("           notificationData=" + op.notificationData);
+                pw.println(" iconData=" + op.iconData);
+                pw.println(" notificationData=" + op.notificationData);
             }
-            pw.println("  mExpandedParams: " + mExpandedParams);
-            pw.println("  mExpandedView: " + viewInfo(mExpandedView));
-            pw.println("  mExpandedDialog: " + mExpandedDialog);
-            pw.println("  mTrackingParams: " + mTrackingParams);
-            pw.println("  mTrackingView: " + viewInfo(mTrackingView));
-            pw.println("  mOngoingTitle: " + viewInfo(mOngoingTitle));
-            pw.println("  mOngoingItems: " + viewInfo(mOngoingItems));
-            pw.println("  mLatestTitle: " + viewInfo(mLatestTitle));
-            pw.println("  mLatestItems: " + viewInfo(mLatestItems));
-            pw.println("  mNoNotificationsTitle: " + viewInfo(mNoNotificationsTitle));
-            pw.println("  mCloseView: " + viewInfo(mCloseView));
-            pw.println("  mTickerView: " + viewInfo(mTickerView));
-            pw.println("  mScrollView: " + viewInfo(mScrollView)
+            pw.println(" mExpandedParams: " + mExpandedParams);
+            pw.println(" mExpandedView: " + viewInfo(mExpandedView));
+            pw.println(" mExpandedDialog: " + mExpandedDialog);
+            pw.println(" mTrackingParams: " + mTrackingParams);
+            pw.println(" mTrackingView: " + viewInfo(mTrackingView));
+            pw.println(" mOngoingTitle: " + viewInfo(mOngoingTitle));
+            pw.println(" mOngoingItems: " + viewInfo(mOngoingItems));
+            pw.println(" mLatestTitle: " + viewInfo(mLatestTitle));
+            pw.println(" mLatestItems: " + viewInfo(mLatestItems));
+            pw.println(" mNoNotificationsTitle: " + viewInfo(mNoNotificationsTitle));
+            pw.println(" mCloseView: " + viewInfo(mCloseView));
+            pw.println(" mTickerView: " + viewInfo(mTickerView));
+            pw.println(" mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
             pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
         }
         synchronized (mIconMap) {
             final int N = mIconMap.size();
-            pw.println("  mIconMap.size=" + N);
+            pw.println(" mIconMap.size=" + N);
             Set<IBinder> keys = mIconMap.keySet();
             int i=0;
             for (IBinder key: keys) {
                 StatusBarIcon icon = mIconMap.get(key);
-                pw.println("    [" + i + "] key=" + key);
-                pw.println("           data=" + icon.mData);
+                pw.println(" [" + i + "] key=" + key);
+                pw.println(" data=" + icon.mData);
                 i++;
             }
         }
         synchronized (mNotificationData) {
             int N = mNotificationData.ongoingCount();
-            pw.println("  ongoingCount.size=" + N);
+            pw.println(" ongoingCount.size=" + N);
             for (int i=0; i<N; i++) {
                 StatusBarNotification n = mNotificationData.getOngoing(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
+                pw.println(" [" + i + "] key=" + n.key + " view=" + n.view);
+                pw.println(" data=" + n.data);
             }
             N = mNotificationData.latestCount();
-            pw.println("  ongoingCount.size=" + N);
+            pw.println(" ongoingCount.size=" + N);
             for (int i=0; i<N; i++) {
                 StatusBarNotification n = mNotificationData.getLatest(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
+                pw.println(" [" + i + "] key=" + n.key + " view=" + n.view);
+                pw.println(" data=" + n.data);
             }
         }
         synchronized (mDisableRecords) {
             final int N = mDisableRecords.size();
-            pw.println("  mDisableRecords.size=" + N
+            pw.println(" mDisableRecords.size=" + N
                     + " mDisabled=0x" + Integer.toHexString(mDisabled));
             for (int i=0; i<N; i++) {
                 DisableRecord tok = mDisableRecords.get(i);
-                pw.println("    [" + i + "] what=0x" + Integer.toHexString(tok.what)
+                pw.println(" [" + i + "] what=0x" + Integer.toHexString(tok.what)
                                 + " pkg=" + tok.pkg + " token=" + tok.token);
             }
         }
@@ -1524,7 +1537,7 @@ public class StatusBarService extends IStatusBar.Stub
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 pixelFormat);
-//        lp.token = mStatusBarView.getWindowToken();
+// lp.token = mStatusBarView.getWindowToken();
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("TrackingView");
         lp.y = mTrackingPosition;
@@ -1660,7 +1673,7 @@ public class StatusBarService extends IStatusBar.Stub
         }
 
         if (SPEW) {
-            Slog.d(TAG, "updateExpandedViewPos after  expandedPosition=" + expandedPosition
+            Slog.d(TAG, "updateExpandedViewPos after expandedPosition=" + expandedPosition
                     + " mTrackingParams.y=" + mTrackingParams.y
                     + " mTrackingPosition=" + mTrackingPosition
                     + " mExpandedParams.y=" + mExpandedParams.y
@@ -1680,12 +1693,12 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     /**
-     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
-     * This was added last-minute and is inconsistent with the way the rest of the notifications
-     * are handled, because the notification isn't really cancelled.  The lights are just
-     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
-     * this is what he wants. (see bug 1131461)
-     */
+* The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
+* This was added last-minute and is inconsistent with the way the rest of the notifications
+* are handled, because the notification isn't really cancelled. The lights are just
+* turned off. If any other notifications happen, the lights will turn back on. Steve says
+* this is what he wants. (see bug 1131461)
+*/
     private boolean mPanelSlightlyVisible;
     void panelSlightlyVisible(boolean visible) {
         if (mPanelSlightlyVisible != visible) {
@@ -1785,12 +1798,12 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     /**
-     * Reload some of our resources when the configuration changes.
-     * 
-     * We don't reload everything when the configuration changes -- we probably
-     * should, but getting that smooth is tough.  Someday we'll fix that.  In the
-     * meantime, just update the things that we know change.
-     */
+* Reload some of our resources when the configuration changes.
+*
+* We don't reload everything when the configuration changes -- we probably
+* should, but getting that smooth is tough. Someday we'll fix that. In the
+* meantime, just update the things that we know change.
+*/
     void updateResources() {
         Resources res = mContext.getResources();
 

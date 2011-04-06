@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Binder;
@@ -126,7 +127,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
     private static final int SOUND_EFFECT_VOLUME = 1000;
 
-    /* Sound effect file names  */
+    /* Sound effect file names */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
     private static final String[] SOUND_EFFECT_FILES = new String[] {
         "Effect_Tick.ogg",
@@ -140,45 +141,45 @@ public class AudioService extends IAudioService.Stub {
      * file index in SOUND_EFFECT_FILES[] (first column) and indicating if effect
      * uses soundpool (second column) */
     private int[][] SOUND_EFFECT_FILES_MAP = new int[][] {
-        {0, -1},  // FX_KEY_CLICK
-        {0, -1},  // FX_FOCUS_NAVIGATION_UP
-        {0, -1},  // FX_FOCUS_NAVIGATION_DOWN
-        {0, -1},  // FX_FOCUS_NAVIGATION_LEFT
-        {0, -1},  // FX_FOCUS_NAVIGATION_RIGHT
-        {1, -1},  // FX_KEYPRESS_STANDARD
-        {2, -1},  // FX_KEYPRESS_SPACEBAR
-        {3, -1},  // FX_FOCUS_DELETE
-        {4, -1}   // FX_FOCUS_RETURN
+        {0, -1}, // FX_KEY_CLICK
+        {0, -1}, // FX_FOCUS_NAVIGATION_UP
+        {0, -1}, // FX_FOCUS_NAVIGATION_DOWN
+        {0, -1}, // FX_FOCUS_NAVIGATION_LEFT
+        {0, -1}, // FX_FOCUS_NAVIGATION_RIGHT
+        {1, -1}, // FX_KEYPRESS_STANDARD
+        {2, -1}, // FX_KEYPRESS_SPACEBAR
+        {3, -1}, // FX_FOCUS_DELETE
+        {4, -1} // FX_FOCUS_RETURN
     };
 
    /** @hide Maximum volume index values for audio streams */
     private int[] MAX_STREAM_VOLUME = new int[] {
-        5,  // STREAM_VOICE_CALL
-        7,  // STREAM_SYSTEM
-        7,  // STREAM_RING
+        5, // STREAM_VOICE_CALL
+        7, // STREAM_SYSTEM
+        7, // STREAM_RING
         15, // STREAM_MUSIC
-        7,  // STREAM_ALARM
-        7,  // STREAM_NOTIFICATION
+        7, // STREAM_ALARM
+        7, // STREAM_NOTIFICATION
         15, // STREAM_BLUETOOTH_SCO
-        7,  // STREAM_SYSTEM_ENFORCED
+        7, // STREAM_SYSTEM_ENFORCED
         15, // STREAM_DTMF
-        15  // STREAM_TTS
+        15 // STREAM_TTS
     };
     /* STREAM_VOLUME_ALIAS[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
      * NOTE: do not create loops in aliases! */
     private int[] STREAM_VOLUME_ALIAS = new int[] {
-        AudioSystem.STREAM_VOICE_CALL,  // STREAM_VOICE_CALL
-        AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM
-        AudioSystem.STREAM_RING,  // STREAM_RING
+        AudioSystem.STREAM_VOICE_CALL, // STREAM_VOICE_CALL
+        AudioSystem.STREAM_SYSTEM, // STREAM_SYSTEM
+        AudioSystem.STREAM_RING, // STREAM_RING
         AudioSystem.STREAM_MUSIC, // STREAM_MUSIC
-        AudioSystem.STREAM_ALARM,  // STREAM_ALARM
-        AudioSystem.STREAM_NOTIFICATION,  // STREAM_NOTIFICATION
+        AudioSystem.STREAM_ALARM, // STREAM_ALARM
+        AudioSystem.STREAM_NOTIFICATION, // STREAM_NOTIFICATION
         AudioSystem.STREAM_BLUETOOTH_SCO, // STREAM_BLUETOOTH_SCO
-        AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM_ENFORCED
+        AudioSystem.STREAM_SYSTEM, // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_VOICE_CALL, // STREAM_DTMF
-        AudioSystem.STREAM_MUSIC  // STREAM_TTS
+        AudioSystem.STREAM_MUSIC // STREAM_TTS
     };
 
     private AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
@@ -235,8 +236,8 @@ public class AudioService extends IAudioService.Stub {
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
-    //  Broadcast receiver for media button broadcasts (separate from mReceiver to
-    //  independently change its priority)
+    // Broadcast receiver for media button broadcasts (separate from mReceiver to
+    // independently change its priority)
     private final BroadcastReceiver mMediaButtonReceiver = new MediaButtonBroadcastReceiver();
 
     // Devices currently connected
@@ -828,9 +829,9 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /**
-     *  Unloads samples from the sound pool.
-     *  This method can be called to free some memory when
-     *  sound effects are disabled.
+     * Unloads samples from the sound pool.
+     * This method can be called to free some memory when
+     * sound effects are disabled.
      */
     public void unloadSoundEffects() {
         synchronized (mSoundEffectsLock) {
@@ -1003,7 +1004,7 @@ public class AudioService extends IAudioService.Stub {
                         mCb.linkToDeath(this, 0);
                     } catch (RemoteException e) {
                         // client has already died!
-                        Log.w(TAG, "ScoClient  incCount() could not link to "+mCb+" binder death");
+                        Log.w(TAG, "ScoClient incCount() could not link to "+mCb+" binder death");
                     }
                 }
                 mStartcount++;
@@ -1127,6 +1128,10 @@ public class AudioService extends IAudioService.Stub {
      * indices on the stream states.
      */
     private boolean checkForRingerModeChange(int oldIndex, int direction) {
+        boolean mVolumeControlSilent = Settings.System.getInt(mContentResolver,
+                Settings.System.VOLUME_CONTROL_SILENT, 0) != 0;
+        boolean vibrateInSilent = System.getInt(mContentResolver,
+                System.VIBRATE_IN_SILENT, 1) == 1;
         boolean adjustVolumeIndex = true;
         int newRingerMode = mRingerMode;
 
@@ -1134,19 +1139,35 @@ public class AudioService extends IAudioService.Stub {
             // audible mode, at the bottom of the scale
             if (direction == AudioManager.ADJUST_LOWER
                     && (oldIndex + 5) / 10 == 1) {
-                // "silent mode", but which one?
-                newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
-                    ? AudioManager.RINGER_MODE_VIBRATE
-                    : AudioManager.RINGER_MODE_SILENT;
+                if (vibrateInSilent) {
+                    newRingerMode = AudioManager.RINGER_MODE_VIBRATE;
+                } else {
+                    newRingerMode = AudioManager.RINGER_MODE_SILENT;
+                }
             }
-        } else {
+        } else if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
             if (direction == AudioManager.ADJUST_RAISE) {
-                // exiting silent mode
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+            } else if (direction == AudioManager.ADJUST_LOWER
+                    && mVolumeControlSilent) {
+                newRingerMode = AudioManager.RINGER_MODE_SILENT;
             } else {
                 // prevent last audible index to reach 0
                 adjustVolumeIndex = false;
             }
+        } else if (mRingerMode == AudioManager.RINGER_MODE_SILENT) {
+            if (direction == AudioManager.ADJUST_RAISE) {
+                if (vibrateInSilent) {
+                    newRingerMode = AudioManager.RINGER_MODE_VIBRATE;
+                } else {
+                    newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+                }
+            } else {
+                adjustVolumeIndex = false;
+            }
+        } else {
+            // is this fallback needed?
+            newRingerMode = AudioManager.RINGER_MODE_NORMAL;
         }
 
         if (newRingerMode != mRingerMode) {
@@ -1674,7 +1695,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_BTA2DP_DOCK_TIMEOUT:
-                    // msg.obj  == address of BTA2DP device
+                    // msg.obj == address of BTA2DP device
                     makeA2dpDeviceUnavailableNow( (String) msg.obj );
                     break;
             }
@@ -1686,7 +1707,7 @@ public class AudioService extends IAudioService.Stub {
         SettingsObserver() {
             super(new Handler());
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
+                    Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NOTIFICATIONS_USE_RING_VOLUME), false, this);
         }
@@ -1721,8 +1742,8 @@ public class AudioService extends IAudioService.Stub {
                         mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
                                 System.VOLUME_SETTINGS[AudioSystem.STREAM_NOTIFICATION]);
                         // Persist notification volume volume as it was not persisted while aliased to ring volume
-                        //  and persist with no delay as there might be registered observers of the persisted
-                        //  notification volume.
+                        // and persist with no delay as there might be registered observers of the persisted
+                        // notification volume.
                         sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, AudioSystem.STREAM_NOTIFICATION,
                                 SENDMSG_REPLACE, 1, 1, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
                     }
@@ -1885,7 +1906,7 @@ public class AudioService extends IAudioService.Stub {
                                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                 "");
                         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
-                    } else if (state == 1 && !isConnected)  {
+                    } else if (state == 1 && !isConnected) {
                         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
                                 AudioSystem.DEVICE_STATE_AVAILABLE,
                                 "");
@@ -1898,7 +1919,7 @@ public class AudioService extends IAudioService.Stub {
                                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                 "");
                         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
-                    } else if (state == 1 && !isConnected)  {
+                    } else if (state == 1 && !isConnected) {
                         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
                                 AudioSystem.DEVICE_STATE_AVAILABLE,
                                 "");
@@ -2017,7 +2038,7 @@ public class AudioService extends IAudioService.Stub {
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
-                pw.println("     source:" + fse.mSourceRef + " -- client: " + fse.mClientId
+                pw.println(" source:" + fse.mSourceRef + " -- client: " + fse.mClientId
                         + " -- duration: " +fse.mFocusChangeType);
             }
         }
@@ -2028,13 +2049,13 @@ public class AudioService extends IAudioService.Stub {
      * Remove a focus listener from the focus stack.
      * @param focusListenerToRemove the focus listener
      * @param signal if true and the listener was at the top of the focus stack, i.e. it was holding
-     *   focus, notify the next item in the stack it gained focus.
+     * focus, notify the next item in the stack it gained focus.
      */
     private void removeFocusStackEntry(String clientToRemove, boolean signal) {
         // is the current top of the focus stack abandoning focus? (because of death or request)
         if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientToRemove))
         {
-            //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
+            //Log.i(TAG, " removeFocusStackEntry() removing top of stack");
             mFocusStack.pop();
             if (signal) {
                 // notify the new top of the stack it gained focus
@@ -2047,7 +2068,7 @@ public class AudioService extends IAudioService.Stub {
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
                 if(fse.mClientId.equals(clientToRemove)) {
-                    Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
+                    Log.i(TAG, " AudioFocus abandonAudioFocus(): removing entry for "
                             + fse.mClientId);
                     mFocusStack.remove(fse);
                 }
@@ -2067,14 +2088,14 @@ public class AudioService extends IAudioService.Stub {
         while(stackIterator.hasNext()) {
             FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
             if(fse.mSourceRef.equals(cb)) {
-                Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
+                Log.i(TAG, " AudioFocus abandonAudioFocus(): removing entry for "
                         + fse.mClientId);
                 mFocusStack.remove(fse);
             }
         }
         if (isTopOfStackForClientToRemove) {
             // we removed an entry at the top of the stack:
-            //  notify the new top of the stack it gained focus.
+            // notify the new top of the stack it gained focus.
             notifyTopOfAudioFocusStack();
         }
     }
@@ -2105,7 +2126,7 @@ public class AudioService extends IAudioService.Stub {
 
         public void binderDied() {
             synchronized(mAudioFocusLock) {
-                Log.w(TAG, "  AudioFocus   audio focus client died");
+                Log.w(TAG, " AudioFocus audio focus client died");
                 removeFocusStackEntryForClient(mCb);
             }
         }
@@ -2119,14 +2140,14 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#requestAudioFocus(IAudioFocusDispatcher, int, int) */
     public int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId) {
-        Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
+        Log.i(TAG, " AudioFocus requestAudioFocus() from " + clientId);
         // the main stream type for the audio focus request is currently not used. It may
         // potentially be used to handle multiple stream type-dependent audio focuses.
 
         // we need a valid binder callback for clients other than the AudioService's phone
         // state listener
         if (!IN_VOICE_COMM_FOCUS_ID.equals(clientId) && ((cb == null) || !cb.pingBinder())) {
-            Log.i(TAG, " AudioFocus  DOA client for requestAudioFocus(), exiting");
+            Log.i(TAG, " AudioFocus DOA client for requestAudioFocus(), exiting");
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
@@ -2176,7 +2197,7 @@ public class AudioService extends IAudioService.Stub {
                 cb.linkToDeath(afdh, 0);
             } catch (RemoteException e) {
                 // client has already died!
-                Log.w(TAG, "AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
+                Log.w(TAG, "AudioFocus requestAudioFocus() could not link to "+cb+" binder death");
             }
         }
 
@@ -2185,7 +2206,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#abandonAudioFocus(IAudioFocusDispatcher) */
     public int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId) {
-        Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
+        Log.i(TAG, " AudioFocus abandonAudioFocus() from " + clientId);
         try {
             // this will take care of notifying the new focus owner if needed
             synchronized(mAudioFocusLock) {
@@ -2195,7 +2216,7 @@ public class AudioService extends IAudioService.Stub {
             // Catching this exception here is temporary. It is here just to prevent
             // a crash seen when the "Silent" notification is played. This is believed to be fixed
             // but this try catch block is left just to be safe.
-            Log.e(TAG, "FATAL EXCEPTION AudioFocus  abandonAudioFocus() caused " + cme);
+            Log.e(TAG, "FATAL EXCEPTION AudioFocus abandonAudioFocus() caused " + cme);
             cme.printStackTrace();
         }
 
@@ -2229,7 +2250,7 @@ public class AudioService extends IAudioService.Stub {
             if (event != null) {
                 // if in a call or ringing, do not break the current phone app behavior
                 // TODO modify this to let the phone app specifically get the RC focus
-                //      add modify the phone app to take advantage of the new API
+                // add modify the phone app to take advantage of the new API
                 if ((getMode() == AudioSystem.MODE_IN_CALL) ||
                         (getMode() == AudioSystem.MODE_RINGTONE)) {
                     return;
@@ -2275,7 +2296,7 @@ public class AudioService extends IAudioService.Stub {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry fse = stackIterator.next();
-                pw.println("     receiver:" + fse.mReceiverComponent);
+                pw.println(" receiver:" + fse.mReceiverComponent);
             }
         }
     }
@@ -2318,7 +2339,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
     public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
-        Log.i(TAG, "  Remote Control   registerMediaButtonEventReceiver() for " + eventReceiver);
+        Log.i(TAG, " Remote Control registerMediaButtonEventReceiver() for " + eventReceiver);
 
         synchronized(mRCStack) {
             pushMediaButtonReceiver(eventReceiver);
@@ -2327,7 +2348,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** see AudioManager.unregisterMediaButtonEventReceiver(ComponentName eventReceiver) */
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
-        Log.i(TAG, "  Remote Control   unregisterMediaButtonEventReceiver() for " + eventReceiver);
+        Log.i(TAG, " Remote Control unregisterMediaButtonEventReceiver() for " + eventReceiver);
 
         synchronized(mRCStack) {
             removeMediaButtonReceiver(eventReceiver);
@@ -2342,5 +2363,17 @@ public class AudioService extends IAudioService.Stub {
         dumpRCStack(pw);
     }
 
-
+    /**
+     * @hide
+     */
+    public void broadcastMediaPlaybackState(int state) {
+        // send broadcast
+        if (ActivityManagerNative.isSystemReady()) {
+            Intent broadcast = new Intent(MediaPlayer.MEDIA_PLAYBACK_STATE_CHANGED_ACTION);
+            broadcast.putExtra(MediaPlayer.EXTRA_MEDIA_PLAYBACK_STATE, state);
+            mContext.sendBroadcast(broadcast);
+        }
+    }
 }
+
+

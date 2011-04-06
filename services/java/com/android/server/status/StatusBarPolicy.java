@@ -28,6 +28,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
