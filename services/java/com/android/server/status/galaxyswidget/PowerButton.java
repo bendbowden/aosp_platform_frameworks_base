@@ -98,13 +98,13 @@ public abstract class PowerButton {
                     updateImageView(buttonIcon, mIcon);
 
                     int sColorMaskBase = Settings.System.getInt(context.getContentResolver(),
-                            Settings.System.GALAXY_S_WIDGET_COLOR, 0xFF99CC33);
+                            Settings.System.GALAXY_S_WIDGET_COLOR, 0xFFFFFFFF);
                     int sColorMaskOn = (sColorMaskBase & 0x00FFFFFF) | 0xC0000000;
                     int sColorMaskOff = (sColorMaskBase & 0x00FFFFFF) | 0x30000000;
                     int sColorMaskInter = (sColorMaskBase & 0x00FFFFFF) | 0x70000000;
 
                     /* Button State */
-                    switch(mState) {
+                    switch(mStatFFFFFFe) {
                         case STATE_ENABLED:
                             updateImageView(buttonState,
                                     res.getDrawable(R.drawable.stat_bgon_custom, sColorMaskOn, MASK_MODE));
