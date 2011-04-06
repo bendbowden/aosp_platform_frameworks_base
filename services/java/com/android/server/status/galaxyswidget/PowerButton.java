@@ -104,7 +104,7 @@ public abstract class PowerButton {
                     int sColorMaskInter = (sColorMaskBase & 0x00FFFFFF) | 0x70000000;
 
                     /* Button State */
-                    switch(mStatFFFFFFe) {
+                    switch(mState) {
                         case STATE_ENABLED:
                             updateImageView(buttonState,
                                     res.getDrawable(R.drawable.stat_bgon_custom, sColorMaskOn, MASK_MODE));
