@@ -1,5 +1,4 @@
 /*
-*
 * Copyright (C) 2007 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,11 +25,13 @@ import android.app.IStatusBar;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -41,6 +42,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.provider.Telephony;
 import android.util.Slog;
 import android.view.Display;
@@ -68,9 +70,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-import android.content.ContentResolver;
-import android.database.ContentObserver;
 import android.provider.Settings;
+
 import com.android.server.status.galaxyswidget.GalaxySWidget;
 
 /**
@@ -106,6 +107,7 @@ public class StatusBarService extends IStatusBar.Stub
     private static final int OP_EXPAND = 5;
     private static final int OP_TOGGLE = 6;
     private static final int OP_DISABLE = 7;
+
     private class PendingOp {
         IBinder key;
         int code;
@@ -131,6 +133,7 @@ public class StatusBarService extends IStatusBar.Stub
         void onSetDisabled(int status);
         void onClearAll();
         void onNotificationClick(String pkg, String tag, int id);
+        void onNotificationClear(String pkg, String tag, int id);
         void onPanelRevealed();
     }
 
@@ -157,7 +160,7 @@ public class StatusBarService extends IStatusBar.Stub
     final Display mDisplay;
     StatusBarView mStatusBarView;
     int mPixelFormat;
-    H mHandler = new H();
+    H mHandler;
     Object mQueueLock = new Object();
     ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
     NotificationCallbacks mNotificationCallbacks;
@@ -214,6 +217,7 @@ public class StatusBarService extends IStatusBar.Stub
     private Ticker mTicker;
     private View mTickerView;
     private boolean mTicking;
+    private TickerView mTickerText;
     
     // Tracking finger for opening/closing.
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
@@ -232,7 +236,13 @@ public class StatusBarService extends IStatusBar.Stub
     boolean mAnimatingReveal = false;
     int mViewDelta;
     int[] mAbsPos = new int[2];
-    
+
+    int mBlackColor = 0xff000000;
+    int mWhiteColor = 0xffffffff;
+    int mNotificationTitleColor = mBlackColor;
+    int mNotificationTextColor = mBlackColor;
+    int mNotificationTimeColor = mBlackColor;
+   
     // for disabling the status bar
     ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
     int mDisabled = 0;
@@ -242,10 +252,31 @@ public class StatusBarService extends IStatusBar.Stub
 */
     public StatusBarService(Context context) {
         mContext = context;
+mHandler = new H();
+
+        mNotificationTitleColor = Settings.System.getInt(
+                context.getContentResolver(),
+                Settings.System.COLOR_NOTIFICATION_ITEM_TITLE,
+                mBlackColor
+                );
+        mNotificationTextColor = Settings.System.getInt(
+                context.getContentResolver(),
+                Settings.System.COLOR_NOTIFICATION_ITEM_TEXT,
+                mBlackColor
+                );
+        mNotificationTimeColor = Settings.System.getInt(
+                context.getContentResolver(),
+                Settings.System.COLOR_NOTIFICATION_ITEM_TIME,
+                mBlackColor
+                );
+
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
         makeStatusBarView(context);
+        updateColors();
         mUninstallReceiver = new UninstallReceiver();
+        SettingsObserver observer = new SettingsObserver(mHandler);
+        observer.observe();
     }
 
     public void setNotificationCallbacks(NotificationCallbacks listener) {
@@ -302,11 +333,11 @@ public class StatusBarService extends IStatusBar.Stub
 
         mGalaxySWidget = (GalaxySWidget)expanded.findViewById(R.id.galaxy_s_widget);
         mGalaxySWidget.setupSettingsObserver(mHandler);
-        
+
         mTicker = new MyTicker(context, sb);
 
-        TickerView tickerView = (TickerView)sb.findViewById(R.id.tickerText);
-        tickerView.mTicker = mTicker;
+        mTickerText = (TickerView)sb.findViewById(R.id.tickerText);
+        mTickerText.mTicker = mTicker;
 
         mTrackingView = (TrackingView)View.inflate(context,
                 com.android.internal.R.layout.status_bar_tracking, null);
@@ -356,12 +387,11 @@ public class StatusBarService extends IStatusBar.Stub
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBar");
         lp.windowAnimations = R.style.Animation_StatusBar;
-
         WindowManagerImpl.getDefault().addView(view, lp);
 
         mGalaxySWidget.setupWidget();
     }
-    
+
     // ================================================================================
     // From IStatusBar
     // ================================================================================
@@ -841,7 +871,7 @@ public class StatusBarService extends IStatusBar.Stub
     };
     
     View makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
-        NotificationData n = notification.data;
+        final NotificationData n = notification.data;
         RemoteViews remoteViews = n.contentView;
         if (remoteViews == null) {
             return null;
@@ -850,7 +880,14 @@ public class StatusBarService extends IStatusBar.Stub
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event, parent, false);
+        LatestItemContainer row = (LatestItemContainer) inflater.inflate(com.android.internal.R.layout.status_bar_latest_event, parent, false);
+        if (n.clearable) {
+            row.setOnSwipeCallback(new Runnable() {
+                public void run() {
+                    mNotificationCallbacks.onNotificationClear(n.pkg, n.tag, n.id);
+                }
+            });
+        }
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
@@ -873,6 +910,8 @@ public class StatusBarService extends IStatusBar.Stub
             Slog.e(TAG, "couldn't inflate view for package " + n.pkg, exception);
             return null;
         }
+
+        recursivelySetNotificationColors(child);
         content.addView(child);
 
         row.setDrawingCacheEnabled(true);
@@ -881,6 +920,42 @@ public class StatusBarService extends IStatusBar.Stub
         notification.contentView = child;
 
         return row;
+    }
+
+    void recursivelySetNotificationColors(View v) {
+        ViewGroup vg = (ViewGroup)v;
+        int count = vg.getChildCount();
+
+        if (count > 0) {
+            for (int i = 0; i < count; i++) {
+                try {
+                    setNotificationTextViewColors((TextView)vg.getChildAt(i));
+                } catch (Exception e) { }
+                try {
+                    recursivelySetNotificationColors((View)vg.getChildAt(i));
+                } catch (Exception e) { }
+            }
+        }
+    }
+
+    void setNotificationTextViewColors(TextView tv) {
+        try {
+            int id = tv.getId();
+            switch (id) {
+                case com.android.internal.R.id.title:
+                    tv.setTextColor(mNotificationTitleColor);
+                    break;
+                case com.android.internal.R.id.text:
+                    tv.setTextColor(mNotificationTextColor);
+                    break;
+                case com.android.internal.R.id.time:
+                    tv.setTextColor(mNotificationTimeColor);
+                    break;
+                default:
+                    tv.setTextColor(mNotificationTextColor);
+                    break;
+            }
+        } catch (Exception e) { }
     }
 
     void addNotificationView(StatusBarNotification notification) {
@@ -1744,6 +1819,65 @@ public class StatusBarService extends IStatusBar.Stub
         }
     }
 
+    private void updateColors() {
+        mDateView.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_DATE,
+                        mBlackColor
+                        )
+                );
+        mNoNotificationsTitle.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_NOTIFICATION_NONE,
+                        mWhiteColor
+                        )
+                );
+        mLatestTitle.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_NOTIFICATION_LATEST,
+                        mWhiteColor
+                        )
+                );
+        mOngoingTitle.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_NOTIFICATION_ONGOING,
+                        mWhiteColor
+                        )
+                );
+        mSpnLabel.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_LABEL_SPN,
+                        mBlackColor
+                        )
+                );
+        mPlmnLabel.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_LABEL_PLMN,
+                        mBlackColor
+                        )
+                );
+        mClearButton.setTextColor(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_NOTIFICATION_CLEAR_BUTTON,
+                        mBlackColor
+                        )
+                );
+        mTickerText.updateColors(
+                Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.COLOR_NOTIFICATION_TICKER_TEXT,
+                        mBlackColor
+                        )
+                );
+    }
+
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             mNotificationCallbacks.onClearAll();
@@ -1848,7 +1982,7 @@ public class StatusBarService extends IStatusBar.Stub
             vibrate();
         }
     };
-    
+
     class UninstallReceiver extends BroadcastReceiver {
         public UninstallReceiver() {
             IntentFilter filter = new IntentFilter();
@@ -1859,7 +1993,7 @@ public class StatusBarService extends IStatusBar.Stub
             IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             mContext.registerReceiver(this, sdFilter);
         }
-        
+
         @Override
         public void onReceive(Context context, Intent intent) {
             String pkgList[] = null;
@@ -1882,13 +2016,67 @@ public class StatusBarService extends IStatusBar.Stub
                     }
                 }
             }
-            
+
             if (list != null) {
                 final int N = list.size();
                 for (int i=0; i<N; i++) {
                     removeIcon(list.get(i).key);
                 }
             }
+        }
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_DATE),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_NOTIFICATION_NONE),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_NOTIFICATION_LATEST),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_NOTIFICATION_ONGOING),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_LABEL_SPN),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_LABEL_PLMN),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_NOTIFICATION_CLEAR_BUTTON),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.COLOR_NOTIFICATION_TICKER_TEXT),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.DISPLAY_STATUS_BAR_CLOCK),
+                            false, this);
+
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.DISPLAY_BATTERY_PERCENTAGE),
+                            false, this);
+        }
+
+        @Override
+        public void onChangeUri(Uri uri, boolean selfChange) {
+            updateColors();
         }
     }
 }

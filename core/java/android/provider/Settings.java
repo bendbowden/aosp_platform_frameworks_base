@@ -1672,6 +1672,72 @@ public final class Settings {
          */
         public static final String VOLUME_CONTROL_SILENT = "volume_contol_silent";
 
+        public static final String COLOR_CLOCK = "color_clock";
+        /**
+         * @hide
+         */
+        public static final String COLOR_DATE = "color_date";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_NONE = "color_notification_none";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_LATEST = "color_notification_latest";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_ONGOING = "color_notification_ongoing";
+        /**
+         * @hide
+         */
+        public static final String COLOR_LABEL_SPN = "color_label_spn";
+        /**
+         * @hide
+         */
+        public static final String COLOR_LABEL_PLMN = "color_label_plmn";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_CLEAR_BUTTON = "color_clear_button";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_TICKER_TEXT = "color_ticker_text";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_ITEM_TITLE = "color_notification_item_title";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_ITEM_TEXT = "color_notification_item_text";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_ITEM_PROGRESS_TEXT = "color_notification_item_progress_text";
+        /**
+         * @hide
+         */
+        public static final String COLOR_NOTIFICATION_ITEM_TIME = "color_notification_item_time";
+	/**
+	* @hide
+	*/
+	public static final String COLOR_BATTERY_PERCENTAGE = "color_battery_percentage";
+
+	/**
+	* should the clock in the notification bar be visible?
+	* @hide
+	*/
+	public static final String DISPLAY_STATUS_BAR_CLOCK = "display_status_bar_clock";
+
+	/**
+	* should we show battery percentage on the battery icon?
+	* @hide
+	*/
+	public static final String DISPLAY_BATTERY_PERCENTAGE = "display_battery_percentage";
+
         /**
          * CDMA only settings
          * DTMF tone type played by the dialer when dialing.

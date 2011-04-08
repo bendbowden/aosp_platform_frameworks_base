@@ -59,18 +59,18 @@ public abstract class PowerButton {
     static {
         BUTTONS.put(BUTTON_WIFI, WifiButton.class);
         BUTTONS.put(BUTTON_GPS, GPSButton.class);
-        BUTTONS.put(BUTTON_BLUETOOTH, BluetoothButton.class);
+        BUTTONS.put(BUTTON_BLUETOOTH, BluetoothButton.class);//
         BUTTONS.put(BUTTON_BRIGHTNESS, BrightnessButton.class);
         BUTTONS.put(BUTTON_SOUND, SoundButton.class);
         BUTTONS.put(BUTTON_SYNC, SyncButton.class);
-        BUTTONS.put(BUTTON_WIFIAP, WifiApButton.class);
+        BUTTONS.put(BUTTON_WIFIAP, WifiApButton.class);//
         BUTTONS.put(BUTTON_SCREENTIMEOUT, ScreenTimeoutButton.class);
         BUTTONS.put(BUTTON_MOBILEDATA, MobileDataButton.class);
         BUTTONS.put(BUTTON_LOCKSCREEN, LockScreenButton.class);
-        BUTTONS.put(BUTTON_NETWORKMODE, NetworkModeButton.class);
+        BUTTONS.put(BUTTON_NETWORKMODE, NetworkModeButton.class);//
         BUTTONS.put(BUTTON_AUTOROTATE, AutoRotateButton.class);
         BUTTONS.put(BUTTON_AIRPLANE, AirplaneButton.class);
-        BUTTONS.put(BUTTON_FLASHLIGHT, FlashlightButton.class);
+        BUTTONS.put(BUTTON_FLASHLIGHT, FlashlightButton.class);//
         BUTTONS.put(BUTTON_SLEEP, SleepButton.class);
         BUTTONS.put(BUTTON_MEDIA_PLAY_PAUSE, MediaPlayPauseButton.class);
         BUTTONS.put(BUTTON_MEDIA_PREVIOUS, MediaPreviousButton.class);

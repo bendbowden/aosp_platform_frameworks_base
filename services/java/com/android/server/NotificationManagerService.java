@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2007 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.server;
 
@@ -128,7 +128,7 @@ class NotificationManagerService extends INotificationManager.Stub
     private NotificationRecord mLedNotification;
 
     private static final int BATTERY_LOW_ARGB = 0xFFFF0000; // Charging Low - red solid on
-    private static final int BATTERY_MEDIUM_ARGB = 0xFFFFFF00;    // Charging - orange solid on
+    private static final int BATTERY_MEDIUM_ARGB = 0xFFFFFF00; // Charging - orange solid on
     private static final int BATTERY_FULL_ARGB = 0xFF00FF00; // Charging Full - green solid on
     private static final int BATTERY_BLINK_ON = 125;
     private static final int BATTERY_BLINK_OFF = 2875;
@@ -178,17 +178,17 @@ class NotificationManagerService extends INotificationManager.Stub
 
         void dump(PrintWriter pw, String prefix, Context baseContext) {
             pw.println(prefix + this);
-            pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
+            pw.println(prefix + " icon=0x" + Integer.toHexString(notification.icon)
                     + " / " + idDebugString(baseContext, this.pkg, notification.icon));
-            pw.println(prefix + "  contentIntent=" + notification.contentIntent);
-            pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
-            pw.println(prefix + "  tickerText=" + notification.tickerText);
-            pw.println(prefix + "  contentView=" + notification.contentView);
-            pw.println(prefix + "  defaults=0x" + Integer.toHexString(notification.defaults));
-            pw.println(prefix + "  flags=0x" + Integer.toHexString(notification.flags));
-            pw.println(prefix + "  sound=" + notification.sound);
-            pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
-            pw.println(prefix + "  ledARGB=0x" + Integer.toHexString(notification.ledARGB)
+            pw.println(prefix + " contentIntent=" + notification.contentIntent);
+            pw.println(prefix + " deleteIntent=" + notification.deleteIntent);
+            pw.println(prefix + " tickerText=" + notification.tickerText);
+            pw.println(prefix + " contentView=" + notification.contentView);
+            pw.println(prefix + " defaults=0x" + Integer.toHexString(notification.defaults));
+            pw.println(prefix + " flags=0x" + Integer.toHexString(notification.flags));
+            pw.println(prefix + " sound=" + notification.sound);
+            pw.println(prefix + " vibrate=" + Arrays.toString(notification.vibrate));
+            pw.println(prefix + " ledARGB=0x" + Integer.toHexString(notification.ledARGB)
                     + " ledOnMS=" + notification.ledOnMS
                     + " ledOffMS=" + notification.ledOffMS);
         }
@@ -272,6 +272,10 @@ class NotificationManagerService extends INotificationManager.Stub
         public void onNotificationClick(String pkg, String tag, int id) {
             cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
                     Notification.FLAG_FOREGROUND_SERVICE);
+        }
+
+        public void onNotificationClear(String pkg, String tag, int id) {
+            cancelNotification(pkg, tag, id, 0, Notification.FLAG_FOREGROUND_SERVICE);
         }
 
         public void onPanelRevealed() {
@@ -496,8 +500,8 @@ class NotificationManagerService extends INotificationManager.Stub
                     index = mToastQueue.size() - 1;
                     keepProcessAliveLocked(callingPid);
                 }
-                // If it's at index 0, it's the current toast.  It doesn't matter if it's
-                // new or just been updated.  Call back and tell it to show itself.
+                // If it's at index 0, it's the current toast. It doesn't matter if it's
+                // new or just been updated. Call back and tell it to show itself.
                 // If the callback fails, this will remove it from the list, so don't
                 // assume that it's valid after this.
                 if (index == 0) {
@@ -659,7 +663,7 @@ class NotificationManagerService extends INotificationManager.Stub
         checkIncomingCall(pkg);
 
         // This conditional is a dirty hack to limit the logging done on
-        //     behalf of the download manager without affecting other apps.
+        // behalf of the download manager without affecting other apps.
         if (!pkg.equals("com.android.providers.downloads")
                 || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
             EventLog.writeEvent(EventLogTags.NOTIFICATION_ENQUEUE, pkg, id, notification.toString());
@@ -711,7 +715,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 CharSequence truncatedTicker = notification.tickerText;
 
                 // TODO: make this restriction do something smarter like never fill
-                // more than two screens.  "Why would anyone need more than 80 characters." :-/
+                // more than two screens. "Why would anyone need more than 80 characters." :-/
                 final int maxTickerLen = 80;
                 if (truncatedTicker != null && truncatedTicker.length() > maxTickerLen) {
                     truncatedTicker = truncatedTicker.subSequence(0, maxTickerLen);
@@ -825,7 +829,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 mLedNotification = null;
             }
             //Slog.i(TAG, "notification.lights="
-            //        + ((old.notification.lights.flags & Notification.FLAG_SHOW_LIGHTS) != 0));
+            // + ((old.notification.lights.flags & Notification.FLAG_SHOW_LIGHTS) != 0));
             if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
                 mLights.add(r);
                 updateLightsLocked();
@@ -904,9 +908,9 @@ class NotificationManagerService extends INotificationManager.Stub
     }
 
     /**
-     * Cancels a notification ONLY if it has all of the {@code mustHaveFlags}
-     * and none of the {@code mustNotHaveFlags}.
-     */
+* Cancels a notification ONLY if it has all of the {@code mustHaveFlags}
+* and none of the {@code mustNotHaveFlags}.
+*/
     private void cancelNotification(String pkg, String tag, int id, int mustHaveFlags,
             int mustNotHaveFlags) {
         EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL, pkg, id, mustHaveFlags);
@@ -932,9 +936,9 @@ class NotificationManagerService extends INotificationManager.Stub
     }
 
     /**
-     * Cancels all notifications from a given package that have all of the
-     * {@code mustHaveFlags}.
-     */
+* Cancels all notifications from a given package that have all of the
+* {@code mustHaveFlags}.
+*/
     boolean cancelAllNotificationsInt(String pkg, int mustHaveFlags,
             int mustNotHaveFlags, boolean doit) {
         EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL_ALL, pkg, mustHaveFlags);
@@ -1018,7 +1022,7 @@ class NotificationManagerService extends INotificationManager.Stub
                             r.notification.deleteIntent.send();
                         } catch (PendingIntent.CanceledException ex) {
                             // do nothing - there's no relevant way to recover, and
-                            //     no reason to let this propagate
+                            // no reason to let this propagate
                             Slog.w(TAG, "canceled PendingIntent for " + r.pkg, ex);
                         }
                     }
@@ -1200,11 +1204,11 @@ class NotificationManagerService extends INotificationManager.Stub
         synchronized (mToastQueue) {
             N = mToastQueue.size();
             if (N > 0) {
-                pw.println("  Toast Queue:");
+                pw.println(" Toast Queue:");
                 for (int i=0; i<N; i++) {
-                    mToastQueue.get(i).dump(pw, "    ");
+                    mToastQueue.get(i).dump(pw, " ");
                 }
-                pw.println("  ");
+                pw.println(" ");
             }
 
         }
@@ -1212,27 +1216,27 @@ class NotificationManagerService extends INotificationManager.Stub
         synchronized (mNotificationList) {
             N = mNotificationList.size();
             if (N > 0) {
-                pw.println("  Notification List:");
+                pw.println(" Notification List:");
                 for (int i=0; i<N; i++) {
-                    mNotificationList.get(i).dump(pw, "    ", mContext);
+                    mNotificationList.get(i).dump(pw, " ", mContext);
                 }
-                pw.println("  ");
+                pw.println(" ");
             }
 
             N = mLights.size();
             if (N > 0) {
-                pw.println("  Lights List:");
+                pw.println(" Lights List:");
                 for (int i=0; i<N; i++) {
-                    mLights.get(i).dump(pw, "    ", mContext);
+                    mLights.get(i).dump(pw, " ", mContext);
                 }
-                pw.println("  ");
+                pw.println(" ");
             }
 
-            pw.println("  mSoundNotification=" + mSoundNotification);
-            pw.println("  mSound=" + mSound);
-            pw.println("  mVibrateNotification=" + mVibrateNotification);
-            pw.println("  mDisabledNotifications=0x" + Integer.toHexString(mDisabledNotifications));
-            pw.println("  mSystemReady=" + mSystemReady);
+            pw.println(" mSoundNotification=" + mSoundNotification);
+            pw.println(" mSound=" + mSound);
+            pw.println(" mVibrateNotification=" + mVibrateNotification);
+            pw.println(" mDisabledNotifications=0x" + Integer.toHexString(mDisabledNotifications));
+            pw.println(" mSystemReady=" + mSystemReady);
         }
     }
 }

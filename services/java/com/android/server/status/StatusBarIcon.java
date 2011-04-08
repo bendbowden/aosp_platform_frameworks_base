@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2008 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.server.status;
 
@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -34,13 +35,6 @@ import android.widget.ImageView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import android.provider.Settings;
-import static android.provider.Settings.System.CLOCK_COLOR;
-import static android.provider.Settings.System.BATTERY_PERCENTAGE;
-import static android.provider.Settings.System.BATTERY_COLOR;
-import static android.provider.Settings.System.BATTERY_FONT_SIZE;
-import static android.provider.Settings.System.CENTER_BATTERY_PERCENT;
 
 class StatusBarIcon {
     // TODO: get this from a resource
@@ -56,10 +50,8 @@ class StatusBarIcon {
     private AnimatedImageView mImageView;
     private TextView mNumberView;
 
-    private int mBatteryFontSize = 12;
+    private int mClockColor = 0x00000000;
     private int mBatteryColor = 0xffffffff;
-    private int mClockColor = 0xff000000;
-    private boolean mCenterBatteryPercent;
 
     public StatusBarIcon(Context context, IconData data, ViewGroup parent) {
         mData = data.clone();
@@ -71,13 +63,13 @@ class StatusBarIcon {
                 mTextView = t;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
+                        LinearLayout.LayoutParams.FILL_PARENT);
                 t.setTextSize(16);
-                t.setTextColor(
-                        Settings.System.getInt(
-                            context.getContentResolver(),
-                            Settings.System.CLOCK_COLOR, mClockColor)
-                );
+t.setTextColor(
+                    Settings.System.getInt(
+                        context.getContentResolver(),
+                        Settings.System.COLOR_CLOCK, mClockColor)
+                    );
                 t.setTypeface(Typeface.DEFAULT_BOLD);
                 t.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 t.setPadding(6, 0, 0, 0);
@@ -86,7 +78,7 @@ class StatusBarIcon {
                 t.setVisibility(
                     Settings.System.getInt(
                         context.getContentResolver(),
-                        Settings.System.DISPLAY_CLOCK, 1) == 1 ? View.VISIBLE : View.GONE
+                        Settings.System.DISPLAY_STATUS_BAR_CLOCK, 1) == 1 ? View.VISIBLE : View.GONE
                     );
                 this.view = t;
                 break;
@@ -135,41 +127,40 @@ class StatusBarIcon {
                 mNumberView = nv;
 
                 // the following is borrowed heavily from cyanogenmod
+                DisplayMetrics dm = new DisplayMetrics();
+WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+                wm.getDefaultDisplay().getMetrics(dm);
 
-                mCenterBatteryPercent = (Settings.System.getInt(context.getContentResolver(),
-                    Settings.System.CENTER_BATTERY_PERCENT, 0) == 1);
-
-                if (mCenterBatteryPercent) {
-                    mNumberView.setLayoutParams(
-                        new FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.WRAP_CONTENT,
-                            FrameLayout.LayoutParams.WRAP_CONTENT,
-                            Gravity.CENTER | Gravity.CENTER_VERTICAL));
-                } else {
+if (dm.densityDpi == DisplayMetrics.DENSITY_HIGH) {
                     mNumberView.setLayoutParams(
                         new FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.WRAP_CONTENT,
                             FrameLayout.LayoutParams.WRAP_CONTENT,
                             Gravity.RIGHT | Gravity.CENTER_VERTICAL));
+
+                    mNumberView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+                } else {
+                    mNumberView.setLayoutParams(
+                        new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            Gravity.CENTER | Gravity.CENTER_VERTICAL));
+
+                    mNumberView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
                 }
-                mNumberView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
 
                 mNumberView.setBackgroundDrawable(null);
                 mNumberView.setTextColor(
-                        Settings.System.getInt(
-                            context.getContentResolver(),
-                            Settings.System.BATTERY_COLOR, mBatteryColor)
-                );
-                mNumberView.setTextSize(
-                        Settings.System.getInt(
-                            context.getContentResolver(),
-                            Settings.System.BATTERY_FONT_SIZE, mBatteryFontSize)
-                );
+                    Settings.System.getInt(
+                        context.getContentResolver(),
+                        Settings.System.COLOR_BATTERY_PERCENTAGE, mBatteryColor)
+                    );
+                mNumberView.setTextSize(12);
                 mNumberView.setVisibility(
-                        Settings.System.getInt(
-                            context.getContentResolver(),
-                            Settings.System.BATTERY_PERCENTAGE, 1) == 1 ? View.VISIBLE : View.GONE
-                );
+                    Settings.System.getInt(
+                        context.getContentResolver(),
+                        Settings.System.DISPLAY_BATTERY_PERCENTAGE, 1) == 1 ? View.VISIBLE : View.GONE
+                    );
 
                 if ((data.number > 0)&&(data.number < 100)) {
                     nv.setText("" + data.number);
@@ -187,18 +178,13 @@ class StatusBarIcon {
         }
         switch (data.type) {
         case IconData.TEXT:
-            mTextView.setTextColor(
-                    Settings.System.getInt(
-                        context.getContentResolver(),
-                        Settings.System.CLOCK_COLOR, mClockColor)
-            );
             if (!TextUtils.equals(mData.text, data.text)) {
                 TextView tv = mTextView;
                 tv.setText(data.text);
             }
             break;
         case IconData.ICON:
-        case IconData.ICON_NUMBER:
+case IconData.ICON_NUMBER:
             if (((mData.iconPackage != null && data.iconPackage != null)
                         && !mData.iconPackage.equals(data.iconPackage))
                     || mData.iconId != data.iconId
@@ -207,11 +193,6 @@ class StatusBarIcon {
                 im.setImageDrawable(getIcon(context, data));
                 im.setImageLevel(data.iconLevel);
             }
-            mNumberView.setTextColor(
-                    Settings.System.getInt(
-                        context.getContentResolver(),
-                        Settings.System.BATTERY_COLOR, mBatteryColor)
-            );
             if (mData.number != data.number) {
                 TextView nv = mNumberView;
                 if (data.number > 0) {
@@ -239,13 +220,13 @@ class StatusBarIcon {
 
 
     /**
-     * Returns the right icon to use for this item, respecting the iconId and
-     * iconPackage (if set)
-     * 
-     * @param context Context to use to get resources if iconPackage is not set
-     * @return Drawable for this item, or null if the package or item could not
-     *         be found
-     */
+* Returns the right icon to use for this item, respecting the iconId and
+* iconPackage (if set)
+*
+* @param context Context to use to get resources if iconPackage is not set
+* @return Drawable for this item, or null if the package or item could not
+* be found
+*/
     static Drawable getIcon(Context context, IconData data) {
 
         Resources r = null;
@@ -281,4 +262,3 @@ class StatusBarIcon {
         return mData.number;
     }
 }
-

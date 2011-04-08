@@ -420,6 +420,23 @@ public class StatusBarPolicy {
         mClockIcon = service.addIcon(mClockData, null);
         updateClock();
 
+        ContentObserver coClock = new ContentObserver(null) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateClock();
+            }
+        };
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.COLOR_CLOCK),
+                false,
+                coClock);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.DISPLAY_STATUS_BAR_CLOCK),
+                false,
+                coClock);
+
         // storage
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         mStorageManager.registerListener(
@@ -429,6 +446,23 @@ public class StatusBarPolicy {
         mBatteryData = IconData.makeIconNumber("battery",
                 null, com.android.internal.R.drawable.stat_sys_battery_unknown, 0, 0);
         mBatteryIcon = service.addIcon(mBatteryData, null);
+
+        ContentObserver coBattery = new ContentObserver(null) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateBattery(null);
+            }
+        };
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.COLOR_BATTERY_PERCENTAGE),
+                false,
+                coBattery);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.DISPLAY_BATTERY_PERCENTAGE),
+                false,
+                coBattery);
 
         // phone_signal
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
