@@ -50,7 +50,7 @@ class StatusBarIcon {
     private AnimatedImageView mImageView;
     private TextView mNumberView;
 
-    private int mClockColor = 0x00000000;
+    private int mClockColor = 0xff000000;
     private int mBatteryColor = 0xffffffff;
 
     public StatusBarIcon(Context context, IconData data, ViewGroup parent) {
