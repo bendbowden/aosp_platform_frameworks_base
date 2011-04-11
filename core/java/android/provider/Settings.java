@@ -1576,45 +1576,6 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_ROTARY_HIDE_ARROWS = "lockscreen_rotary_hide_arrows";
 
-        /**
-         * clock color values
-         * @hide
-         */
-        public static final String CLOCK_COLOR = "clock_color";
-
-        /**
-         * whether to display clock in status bar
-         * boolean (1 or 0).
-         * @hide
-         */
-        public static final String DISPLAY_CLOCK = "display_clock";
-
-        /*
-         * whether to show battery percentage
-         * boolean (1 or 0).
-         * @hide
-         */
-        public static final String BATTERY_PERCENTAGE = "battery_percentage";
-
-        /*
-         * battery percentage color values
-         * @hide
-         */
-        public static final String BATTERY_COLOR = "battery_color";
-
-        /*
-         * battery percentage font size values
-         * @hide
-         */
-        public static final String BATTERY_FONT_SIZE = "battery_font_size";
-
-        /*
-         * whether to center the battery percentage indicator
-         * boolean (1 or 0).
-         * @hide
-         */
-        public static final String CENTER_BATTERY_PERCENT = "center_battery_percent";
-
         /*
          * whether to use custom haptic feedback for volume keys
          * boolean (1 or 0).
