@@ -1699,6 +1699,14 @@ public final class Settings {
 	*/
 	public static final String DISPLAY_BATTERY_PERCENTAGE = "display_battery_percentage";
 
+	//Settings Provider Strings  
+        public static final String CLOCK_COLOR = "clock_color";
+        public static final String DISPLAY_CLOCK = "display_clock";      
+	public static final String BATTERY_FONT_SIZE = "battery_font_size";
+        public static final String BATTERY_PERCENTAGE = "battery_percentage";
+        public static final String BATTERY_COLOR = "battery_color";
+        public static final String CENTER_BATTERY_PERCENT = "center_battery_percent";
+
         /**
          * CDMA only settings
          * DTMF tone type played by the dialer when dialing.
