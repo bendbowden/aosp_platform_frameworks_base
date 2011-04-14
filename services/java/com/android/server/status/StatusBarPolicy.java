@@ -450,7 +450,7 @@ public class StatusBarPolicy {
         ContentObserver coBattery = new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
-                updateBattery(null);
+                updateBattery();
             }
         };
 
