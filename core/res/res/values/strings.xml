@@ -1979,6 +1979,8 @@
     <string name="anr_application_process">Application <xliff:g id="application">%1$s</xliff:g> (in process <xliff:g id="process">%2$s</xliff:g>) is not responding.</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
     <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> is not responding.</string>
+    <!-- Text of the alert that is displayed when a user long-presses back to cancel a process. -->
+    <string name="long_press_back_kill">Kill the currently running process?</string>
     <!-- Button allowing the user to close an application that is not responding. This will kill the application. -->
     <string name="force_close">Force close</string>
     <!-- Button allowing the user to send a bug report for application which has encountered an error. -->

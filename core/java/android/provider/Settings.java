@@ -3538,6 +3538,11 @@ public final class Settings {
         public static final String THROTTLE_MAX_NTP_CACHE_AGE_SEC =
                 "throttle_max_ntp_cache_age_sec";
 
+        /**
+         * Setting to enable long press back to kill processes
+         * @hide
+         */
+        public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
 
         /**
          * @hide
