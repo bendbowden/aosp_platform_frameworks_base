@@ -1607,6 +1607,12 @@ public final class Settings {
          */
         public static final String VM_USES_VERIZON = "vm_uses_verizon";
 
+        /*
+         * whether to launch verizon vvm app with voicemail shortcuts
+         * @hide
+         */
+        public static final String VM_USES_CARRIER = "vm_uses_carrier";
+
          /**
          * should we use galaxy s-style power widget?
          * @hide
