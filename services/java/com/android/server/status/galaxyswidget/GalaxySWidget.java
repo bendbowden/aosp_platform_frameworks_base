@@ -49,7 +49,9 @@ public class GalaxySWidget extends FrameLayout {
     private static final String BUTTONS_DEFAULT = PowerButton.BUTTON_WIFI
                              + BUTTON_DELIMITER + PowerButton.BUTTON_MOBILEDATA
                              + BUTTON_DELIMITER + PowerButton.BUTTON_GPS
-                             + BUTTON_DELIMITER + PowerButton.BUTTON_SOUND;
+                             + BUTTON_DELIMITER + PowerButton.BUTTON_SOUND
+			     + BUTTON_DELIMITER + PowerButton.BUTTON_BRIGHTNESS
+			     + BUTTON_DELIMITER + PowerButton.BUTTON_AUTOROTATE;
 
     private static final FrameLayout.LayoutParams WIDGET_LAYOUT_PARAMS = new FrameLayout.LayoutParams(
                                         ViewGroup.LayoutParams.MATCH_PARENT, // width = match_parent
@@ -184,7 +186,7 @@ public class GalaxySWidget extends FrameLayout {
     public void updateVisibility() {
         // now check if we need to display the widget still
         boolean displayPowerWidget = Settings.System.getInt(mContext.getContentResolver(),
-                   Settings.System.DISPLAY_GALAXY_S_WIDGET, 0) != 0;
+                   Settings.System.DISPLAY_GALAXY_S_WIDGET, 1) != 0;
         if(!displayPowerWidget) {
             setVisibility(View.GONE);
         } else {
