@@ -36,9 +36,9 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import static android.provider.Settings.System.CLOCK_COLOR;
-import static android.provider.Settings.System.BATTERY_PERCENTAGE;
-import static android.provider.Settings.System.BATTERY_COLOR;
+import static android.provider.Settings.System.COLOR_CLOCK;
+import static android.provider.Settings.System.DISPLAY_BATTERY_PERCENTAGE;
+import static android.provider.Settings.System.COLOR_BATTERY_PERCENTAGE;
 import static android.provider.Settings.System.BATTERY_FONT_SIZE;
 import static android.provider.Settings.System.CENTER_BATTERY_PERCENT;
 
@@ -213,7 +213,7 @@ WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVIC
             mTextView.setTextColor(
                     Settings.System.getInt(
                         context.getContentResolver(),
-                        Settings.System.CLOCK_COLOR, mClockColor)
+                        Settings.System.COLOR_CLOCK, mClockColor)
             );
             if (!TextUtils.equals(mData.text, data.text)) {
                 TextView tv = mTextView;

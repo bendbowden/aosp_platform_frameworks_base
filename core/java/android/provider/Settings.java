@@ -1608,7 +1608,7 @@ public final class Settings {
         public static final String VM_USES_VERIZON = "vm_uses_verizon";
 
         /*
-         * whether to launch verizon vvm app with voicemail shortcuts
+         * whether to use the default carrier voicemail
          * @hide
          */
         public static final String VM_USES_CARRIER = "vm_uses_carrier";
@@ -1705,12 +1705,16 @@ public final class Settings {
 	*/
 	public static final String DISPLAY_BATTERY_PERCENTAGE = "display_battery_percentage";
 
-	//Settings Provider Strings  
-        public static final String CLOCK_COLOR = "clock_color";
-        public static final String DISPLAY_CLOCK = "display_clock";      
+	/**
+	* what size do we want our battery percentage text to be?
+	* @hide
+	*/      
 	public static final String BATTERY_FONT_SIZE = "battery_font_size";
-        public static final String BATTERY_PERCENTAGE = "battery_percentage";
-        public static final String BATTERY_COLOR = "battery_color";
+
+	/**
+	* should we center the battery percentage text?
+	* @hide
+	*/  
         public static final String CENTER_BATTERY_PERCENT = "center_battery_percent";
 
         /**
