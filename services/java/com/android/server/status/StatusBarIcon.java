@@ -36,6 +36,12 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import static android.provider.Settings.System.CLOCK_COLOR;
+import static android.provider.Settings.System.BATTERY_PERCENTAGE;
+import static android.provider.Settings.System.BATTERY_COLOR;
+import static android.provider.Settings.System.BATTERY_FONT_SIZE;
+import static android.provider.Settings.System.CENTER_BATTERY_PERCENT;
+
 class StatusBarIcon {
     // TODO: get this from a resource
     private static final int ICON_GAP = 8;
@@ -50,8 +56,10 @@ class StatusBarIcon {
     private AnimatedImageView mImageView;
     private TextView mNumberView;
 
+    private int mBatteryFontSize = 12;
     private int mClockColor = 0xff000000;
     private int mBatteryColor = 0xffffffff;
+    private boolean mCenterBatteryPercent;
 
     public StatusBarIcon(Context context, IconData data, ViewGroup parent) {
         mData = data.clone();
@@ -131,7 +139,27 @@ t.setTextColor(
 WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
                 wm.getDefaultDisplay().getMetrics(dm);
 
-if (dm.densityDpi == DisplayMetrics.DENSITY_HIGH) {
+                mCenterBatteryPercent = (Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.CENTER_BATTERY_PERCENT, 0) == 1);
+
+                if (mCenterBatteryPercent) {
+ 		    mNumberView.setLayoutParams(
+                        new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            Gravity.CENTER | Gravity.CENTER_VERTICAL));
+                    mNumberView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+		} else {
+                    mNumberView.setLayoutParams(
+                        new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            Gravity.RIGHT | Gravity.CENTER_VERTICAL));
+
+                    mNumberView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+                }
+
+		if (dm.densityDpi == DisplayMetrics.DENSITY_HIGH) {
                     mNumberView.setLayoutParams(
                         new FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -155,7 +183,11 @@ if (dm.densityDpi == DisplayMetrics.DENSITY_HIGH) {
                         context.getContentResolver(),
                         Settings.System.COLOR_BATTERY_PERCENTAGE, mBatteryColor)
                     );
-                mNumberView.setTextSize(12);
+                mNumberView.setTextSize(
+                        Settings.System.getInt(
+                            context.getContentResolver(),
+                            Settings.System.BATTERY_FONT_SIZE, mBatteryFontSize)
+                );
                 mNumberView.setVisibility(
                     Settings.System.getInt(
                         context.getContentResolver(),
@@ -178,13 +210,18 @@ if (dm.densityDpi == DisplayMetrics.DENSITY_HIGH) {
         }
         switch (data.type) {
         case IconData.TEXT:
+            mTextView.setTextColor(
+                    Settings.System.getInt(
+                        context.getContentResolver(),
+                        Settings.System.CLOCK_COLOR, mClockColor)
+            );
             if (!TextUtils.equals(mData.text, data.text)) {
                 TextView tv = mTextView;
                 tv.setText(data.text);
             }
             break;
         case IconData.ICON:
-case IconData.ICON_NUMBER:
+	case IconData.ICON_NUMBER:
             if (((mData.iconPackage != null && data.iconPackage != null)
                         && !mData.iconPackage.equals(data.iconPackage))
                     || mData.iconId != data.iconId
@@ -193,6 +230,11 @@ case IconData.ICON_NUMBER:
                 im.setImageDrawable(getIcon(context, data));
                 im.setImageLevel(data.iconLevel);
             }
+            mNumberView.setTextColor(
+                    Settings.System.getInt(
+                        context.getContentResolver(),
+                        Settings.System.COLOR_BATTERY_PERCENTAGE, mBatteryColor)
+            );
             if (mData.number != data.number) {
                 TextView nv = mNumberView;
                 if (data.number > 0) {
