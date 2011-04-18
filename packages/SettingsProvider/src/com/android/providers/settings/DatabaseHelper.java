@@ -1077,6 +1077,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.integer.def_color_notification_item_time);
 
             // Other stuffs 
+	    loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_STYLE_PREF,
+                    R.integer.def_lockscreen_style_pref);
+
             loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                     R.integer.def_screen_brightness);
 

@@ -92,4 +92,8 @@
     <integer name="def_color_notification_item_progress_text">0xff000000</integer>
     <integer name="def_color_notification_item_time">0xff000000</integer>
 
+    <!-- Defaults for Lockscreen Style --> 
+    <!-- 1=Tab 2=Rotary 3=Rotary Rev 4=Lense -->
+    <integer name="def_lockscreen_style_pref">2</integer>
+
 </resources>
