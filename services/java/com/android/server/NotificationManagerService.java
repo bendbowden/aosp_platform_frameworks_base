@@ -1122,6 +1122,7 @@ class NotificationManagerService extends INotificationManager.Stub
     // This is here instead of StatusBarPolicy because it is an important
     // security feature that we don't want people customizing the platform
     // to accidentally lose.
+   private void updateAdbNotification() {
    if (mAdbEnabled && mUsbConnected) {
             if ("0".equals(SystemProperties.get("persist.adb.notify")) ||
                     Settings.Secure.getInt(mContext.getContentResolver(),
