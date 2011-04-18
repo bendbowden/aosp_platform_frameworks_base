@@ -80,5 +80,16 @@
     <integer name="def_color_battery_percentage">0xffffffff</integer>
     <integer name="def_battery_font_size">12</integer>
     <bool name="def_center_battery_percent">false</bool>
+    <integer name="def_galaxy_s_widget_color">0xff000000</integer>
+    <integer name="def_color_notification_none">0xffffffff</integer>
+    <integer name="def_color_notification_latest">0xffffffff</integer>
+    <integer name="def_color_notification_ongoing">0xffffffff</integer>
+    <integer name="def_color_label_plmn">0xff000000</integer>
+    <integer name="def_color_notification_clear_button">0xff000000</integer>
+    <integer name="def_color_notification_ticker_text">0xff000000</integer>
+    <integer name="def_color_notification_item_title">0xff000000</integer>
+    <integer name="def_color_notification_item_text">0xff000000</integer>
+    <integer name="def_color_notification_item_progress_text">0xff000000</integer>
+    <integer name="def_color_notification_item_time">0xff000000</integer>
 
 </resources>

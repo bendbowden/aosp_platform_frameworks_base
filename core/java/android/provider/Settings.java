@@ -1659,7 +1659,7 @@ public final class Settings {
         /**
          * @hide
          */
-        public static final String COLOR_LABEL_SPN = "color_label_spn";
+        /**public static final String COLOR_LABEL_SPN = "color_label_spn";**/
         /**
          * @hide
          */

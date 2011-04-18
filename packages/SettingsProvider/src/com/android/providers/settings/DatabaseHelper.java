@@ -1043,6 +1043,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt, Settings.System.CENTER_BATTERY_PERCENT,
                     R.bool.def_center_battery_percent);
 
+            loadIntegerSetting(stmt, Settings.System.GALAXY_S_WIDGET_COLOR,
+                    R.integer.def_galaxy_s_widget_color);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_NONE,
+                    R.integer.def_color_notification_none);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_LATEST,
+                    R.integer.def_color_notification_latest);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_ONGOING,
+                    R.integer.def_color_notification_ongoing);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_LABEL_PLMN,
+                    R.integer.def_color_label_plmn);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_CLEAR_BUTTON,
+                    R.integer.def_color_notification_clear_button);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_TICKER_TEXT,
+                    R.integer.def_color_notification_ticker_text);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_ITEM_TITLE,
+                    R.integer.def_color_notification_item_title);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_ITEM_TEXT,
+                    R.integer.def_color_notification_item_text);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_ITEM_PROGRESS_TEXT,
+                    R.integer.def_color_notification_item_progress_text);
+
+            loadIntegerSetting(stmt, Settings.System.COLOR_NOTIFICATION_ITEM_TIME,
+                    R.integer.def_color_notification_item_time);
+
             // Other stuffs 
             loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                     R.integer.def_screen_brightness);
