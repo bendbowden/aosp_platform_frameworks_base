@@ -66,7 +66,7 @@ public class VolumePanel extends Handler
 
     private static final int VIBRATE_DURATION = 300;
     private static final int BEEP_DURATION = 150;
-    private static final int MAX_VOLUME = 100;
+    private static final int MAX_VOLUME = 200;
     private static final int FREE_DELAY = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;

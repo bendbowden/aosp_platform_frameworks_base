@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2006 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.internal.telephony;
 //import com.android.internal.telephony.*;
@@ -21,26 +21,25 @@ import java.lang.Comparable;
 import android.telephony.PhoneNumberUtils;
 
 /**
- * {@hide}
- */
+* {@hide}
+*/
 public class DriverCall implements Comparable {
     static final String LOG_TAG = "RILB";
-    static final String NO_VIDEO = "no_video";
 
     public enum State {
         ACTIVE,
         HOLDING,
-        DIALING,    // MO call only
-        ALERTING,   // MO call only
-        INCOMING,   // MT call only
-        WAITING;    // MT call only
+        DIALING, // MO call only
+        ALERTING, // MO call only
+        INCOMING, // MT call only
+        WAITING; // MT call only
         // If you add a state, make sure to look for the switch()
         // statements that use this enum
     }
 
     public int index;
     public boolean isMT;
-    public State state;     // May be null if unavail
+    public State state; // May be null if unavail
     public boolean isMpty;
     public String number;
     public int TOA;
@@ -57,7 +56,7 @@ public class DriverCall implements Comparable {
         DriverCall ret = new DriverCall();
 
         //+CLCC: 1,0,2,0,0,\"+18005551212\",145
-        //     index,isMT,state,mode,isMpty(,number,TOA)?
+        // index,isMT,state,mode,isMpty(,number,TOA)?
         ATResponseParser p = new ATResponseParser(line);
 
         try {
@@ -108,15 +107,15 @@ public class DriverCall implements Comparable {
                 + "toa=" + TOA + ","
                 + (isMpty ? "conf" : "norm") + ","
                 + (isMT ? "mt" : "mo") + ","
-                + als + ","
-                + NO_VIDEO + ","
+                + "als=" + als + ","
                 + (isVoice ? "voc" : "nonvoc") + ","
-                + (isVoicePrivacy ? "evp" : "noevp") + ","
-                + "number=" + number + ","
+                + "nonvid" + ","
+                + number + ","
                 + "cli=" + numberPresentation + ","
                 + "name=" + name + ","
                 + namePresentation;
     }
+// + (isVoicePrivacy ? "evp" : "noevp") + ","
 
     public static State
     stateFromCLCC(int state) throws ATParseEx {
@@ -135,13 +134,16 @@ public class DriverCall implements Comparable {
     public static int
     presentationFromCLIP(int cli) throws ATParseEx
     {
+        Log.d(LOG_TAG, "cli = " + cli);
         switch(cli) {
             case 0: return Connection.PRESENTATION_ALLOWED;
             case 1: return Connection.PRESENTATION_RESTRICTED;
             case 2: return Connection.PRESENTATION_UNKNOWN;
             case 3: return Connection.PRESENTATION_PAYPHONE;
             default:
-                throw new ATParseEx("illegal presentation " + cli);
+                //throw new ATParseEx("illegal presentation " + cli);
+                Log.d(LOG_TAG, "illegal presentation = " + cli);
+                return Connection.PRESENTATION_ALLOWED;
         }
     }
 
