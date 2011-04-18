@@ -3545,6 +3545,12 @@ public final class Settings {
                 "throttle_max_ntp_cache_age_sec";
 
         /**
+         * Setting to disable the display of the ADB USB Debugging Notification
+         * @hide
+         */
+        public static final String DISPLAY_ADB_USB_DEBUGGING_NOTIFICATION = "display_adb_usb_debugging_notification";
+
+        /**
          * Setting to enable long press back to kill processes
          * @hide
          */
