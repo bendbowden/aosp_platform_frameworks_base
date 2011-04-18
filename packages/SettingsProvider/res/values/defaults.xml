@@ -74,10 +74,11 @@
     <bool name="def_vibrate_in_silent">true</bool>
 
     <!-- Defaults for Statusbar -->
-    <integer name="def_clock_color">0xff000000</integer>
-    <bool name="def_display_clock">true</bool>
-    <bool name="def_battery_percentage">true</bool>
-    <integer name="def_battery_color">0xffffffff</integer>
+    <integer name="def_color_clock">0xff000000</integer>
+    <bool name="def_display_status_bar_clock">true</bool>
+    <bool name="def_display_battery_percentage">true</bool>
+    <integer name="def_color_battery_percentage">0xffffffff</integer>
     <integer name="def_battery_font_size">12</integer>
     <bool name="def_center_battery_percent">false</bool>
+
 </resources>
