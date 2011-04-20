@@ -1717,6 +1717,12 @@ public final class Settings {
 	*/  
         public static final String CENTER_BATTERY_PERCENT = "center_battery_percent";
 
+	/**
+	* should we hide/make transparent carrier text on lockscreen?
+	* @hide
+	*/  
+        public static final String HIDE_CARRIER_LOCK = "hide_carrier_lock";
+
         /**
          * CDMA only settings
          * DTMF tone type played by the dialer when dialing.
